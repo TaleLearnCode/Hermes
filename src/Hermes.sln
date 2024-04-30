@@ -5,6 +5,8 @@ VisualStudioVersion = 17.10.34804.81
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Hermes.SqlDatabase", "Hermes.SqlDatabase\Hermes.SqlDatabase.sqlproj", "{3F838309-C506-409F-A54B-26C5B0DE97D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hermes.Services", "Hermes.Services\Hermes.Services.csproj", "{8187DCDD-CC7F-4675-9264-AA6325A98275}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,6 +19,10 @@ Global
 		{3F838309-C506-409F-A54B-26C5B0DE97D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F838309-C506-409F-A54B-26C5B0DE97D1}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3F838309-C506-409F-A54B-26C5B0DE97D1}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{8187DCDD-CC7F-4675-9264-AA6325A98275}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8187DCDD-CC7F-4675-9264-AA6325A98275}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8187DCDD-CC7F-4675-9264-AA6325A98275}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8187DCDD-CC7F-4675-9264-AA6325A98275}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
