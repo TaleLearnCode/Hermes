@@ -1,0 +1,45 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.34804.81
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Hermes.SqlDatabase", "Hermes.SqlDatabase\Hermes.SqlDatabase.sqlproj", "{3F838309-C506-409F-A54B-26C5B0DE97D1}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hermes.Services", "Hermes.Services\Hermes.Services.csproj", "{8187DCDD-CC7F-4675-9264-AA6325A98275}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hermes.CLI", "Hermes.CLI\Hermes.CLI.csproj", "{38876683-3D88-43ED-BC5F-BFDA317BC114}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hermes.CLI2", "Hermes.CLI2\Hermes.CLI2.csproj", "{63DE497A-CA38-4E67-A46D-8BACCC4B5030}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3F838309-C506-409F-A54B-26C5B0DE97D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3F838309-C506-409F-A54B-26C5B0DE97D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3F838309-C506-409F-A54B-26C5B0DE97D1}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{3F838309-C506-409F-A54B-26C5B0DE97D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3F838309-C506-409F-A54B-26C5B0DE97D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3F838309-C506-409F-A54B-26C5B0DE97D1}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{8187DCDD-CC7F-4675-9264-AA6325A98275}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8187DCDD-CC7F-4675-9264-AA6325A98275}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8187DCDD-CC7F-4675-9264-AA6325A98275}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8187DCDD-CC7F-4675-9264-AA6325A98275}.Release|Any CPU.Build.0 = Release|Any CPU
+		{38876683-3D88-43ED-BC5F-BFDA317BC114}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{38876683-3D88-43ED-BC5F-BFDA317BC114}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{38876683-3D88-43ED-BC5F-BFDA317BC114}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{38876683-3D88-43ED-BC5F-BFDA317BC114}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63DE497A-CA38-4E67-A46D-8BACCC4B5030}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63DE497A-CA38-4E67-A46D-8BACCC4B5030}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63DE497A-CA38-4E67-A46D-8BACCC4B5030}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63DE497A-CA38-4E67-A46D-8BACCC4B5030}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {4A375427-5203-4762-951E-761010934CC3}
+	EndGlobalSection
+EndGlobal
