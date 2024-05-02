@@ -29,12 +29,12 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 
 		PresentationRequest template = new()
 		{
-			Type = $"Required -  The type of presentation [{string.Join(", ", presentationTypes)}]",
-			Status = $"Required - The status of the presentation [{string.Join(", ", presentationStatuses)}]",
+			Type = $"Required -  The type of presentation [{string.Join(", ", presentationTypes.Select(x => x.PresentationTypeName))}]",
+			Status = $"Required - The status of the presentation [{string.Join(", ", presentationStatuses.Select(x => x.PresentationStatusName))}]",
 			PublicRepoLink = "Optional - The public repository link of the presentation",
 			PrivateRepoLink = "Optional - The private repository link of the presentation",
 			Permalink = "Required - The permalink of the presentation; used as the identifier",
-			DefaultLanguageCode = "Optional - The default language code of the presentation; default is 'en'",
+			DefaultLanguageCode = "Optional - The default language code of the presentation; default is en.",
 			Texts =
 			[
 				new() {
