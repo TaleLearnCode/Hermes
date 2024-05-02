@@ -34,7 +34,16 @@ internal class Presentations(string databaseConnectionString)
 	{
 		if (File.Exists(output) && !AnsiConsole.Confirm("The specified output path exists; do you want to overwrite?"))
 			return;
-		Console.WriteLine(await _presentationServices.GetTemplateAsync(output));
+		string status = string.Empty;
+		await AnsiConsole.Status()
+			.Spinner(Spinner.Known.Dots8Bit)
+			.SpinnerStyle(Style.Parse("green bold"))
+			.StartAsync("Generating template...", async ctx =>
+			{
+				ctx.Spinner(Spinner.Known.Christmas);
+				status = await _presentationServices.GetTemplateAsync(output);
+			});
+		Console.WriteLine(status);
 	}
 
 }
