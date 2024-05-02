@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "Hermes.CLI": {
-      "commandName": "Project",
-      "commandLineArgs": "--file Hermes.CLI.runtimeconfig.json"
-    }
-  }
-}
