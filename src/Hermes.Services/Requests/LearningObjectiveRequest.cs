@@ -1,4 +1,6 @@
-﻿namespace Hermes.Requests;
+﻿#nullable disable
+
+namespace Hermes.Requests;
 
 public class LearningObjectiveRequest
 {
