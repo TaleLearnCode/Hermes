@@ -1,4 +1,8 @@
-﻿
+﻿using Hermes.Responses;
+using Hermes.Types;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+
 namespace Hermes.Services;
 
 public class PresentationServices(string databaseConnectionString) : ServicesBase(databaseConnectionString)
@@ -85,6 +89,56 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			SerializeAndSaveFile(outputPath ?? $"{permalink}.json", presentationRequest);
 
 		return $"The presentation '{presentation.Permalink}' was successfully added to the database.";
+
+	}
+
+	public async Task<List<PresentationItemResponse>> GetPresentationListAsync(
+		OutputFormat outputFormat,
+		string? outputPath,
+		string? presentationType = null,
+		string? presentationStatus = null)
+	{
+
+		Expression<Func<Presentation, bool>> predicate;
+		if (presentationType is not null && presentationStatus is not null)
+			predicate = x => x.PresentationType.PresentationTypeName == presentationType && x.PresentationStatus.PresentationStatusName == presentationStatus;
+		else if (presentationType is not null)
+			predicate = x => x.PresentationType.PresentationTypeName == presentationType;
+		else if (presentationStatus is not null)
+			predicate = x => x.PresentationStatus.PresentationStatusName == presentationStatus;
+		else
+			predicate = x => true;
+
+
+		using HermesContext context = new(_databaseConnectionString);
+		//return await context.Set<T>().Where(predicate).ToListAsync();
+		//List<Presentation> presentations = await GetWhereAsync(predicate);
+		List<Presentation> presentations = await context.Presentations
+			.Include(x => x.PresentationType)
+			.Include(x => x.PresentationStatus)
+			.Include(x => x.PresentationTexts)
+			.Where(predicate)
+			.ToListAsync();
+
+
+		List<PresentationItemResponse> presentationItems = presentations.Select(x => new PresentationItemResponse
+		{
+			Permalink = x.Permalink,
+			Title = x.PresentationTexts.FirstOrDefault(y => y.LanguageCode == x.DefaultLanguageCode)?.PresentationTitle ?? string.Empty,
+			Type = x.PresentationType.PresentationTypeName,
+			Status = x.PresentationStatus.PresentationStatusName,
+			PublicRepoLink = x.PublicRepoLink,
+			PrivateRepoLink = x.PrivateRepoLink,
+			IncludeInPublicProfile = x.IncludeInPublicProfile,
+			DefaultLanguageCode = x.DefaultLanguageCode
+		}).ToList();
+
+		if (outputFormat == OutputFormat.Json && outputPath is not null)
+			SerializeAndSaveFile(outputPath, presentationItems);
+		if (outputPath != StaticValues.NoEntryDefault)
+			SerializeAndSaveFile(outputPath ?? "presentations.json", presentationItems);
+
+		return presentationItems;
 
 	}
 

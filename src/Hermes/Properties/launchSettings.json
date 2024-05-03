@@ -2,7 +2,7 @@
   "profiles": {
     "Hermes": {
       "commandName": "Project",
-      "commandLineArgs": "presentations add --input \"presentations.json\" -o \"\"",
+      "commandLineArgs": "presentations list",
       "workingDirectory": "C:\\Repos\\Hermes\\src\\Hermes\\bin\\Debug\\net8.0"
     }
   }
