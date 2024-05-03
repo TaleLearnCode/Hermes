@@ -17,7 +17,7 @@ public abstract class ServicesBase
 		WriteIndented = true
 	};
 
-	private readonly string _databaseConnectionString;
+	protected readonly string _databaseConnectionString;
 
 	protected ServicesBase(string databaseConnectionString)
 	{
