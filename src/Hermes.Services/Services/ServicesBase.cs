@@ -1,4 +1,9 @@
-﻿namespace Hermes.Services;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+namespace Hermes.Services;
 
 public abstract class ServicesBase
 {
@@ -8,15 +13,6 @@ public abstract class ServicesBase
 		Converters = { new JsonStringEnumConverter() },
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-		DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
-		WriteIndented = true
-	};
-
-	private readonly JsonSerializerOptions _nullableJsonSerializerOptions = new()
-	{
-		Converters = { new JsonStringEnumConverter() },
-		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-		DefaultIgnoreCondition = JsonIgnoreCondition.Never,
 		DictionaryKeyPolicy = JsonNamingPolicy.CamelCase,
 		WriteIndented = true
 	};
@@ -37,24 +33,32 @@ public abstract class ServicesBase
 	/// <exception cref="IOException">If an I/O error occurs while writing the JSON file.</exception>"
 	/// <exception cref="ArgumentNullException">If the `path` is `null` or empty.</exception>
 	protected string SaveTemplateToFile<T>(string path) where T : class, new()
-		=> SaveTemplateToFile<T>(path, new T());
+		=> SerializeAndSaveFile<T>(path, new T());
 
 	/// <summary>
-	/// <summary>
-	/// Saves a template object of type `T` as a JSON file at the specified `path`.
+	/// Saves an item of type `T` as a JSON file at the specified `path`.
 	/// </summary>
-	/// <typeparam name="T">The type of the template object. It must be a reference type and have a parameterless constructor.</typeparam>
+	/// <typeparam name="T">The type of the object. It must be a reference type and have a parameterless constructor.</typeparam>
 	/// <param name="path">The file path where the JSON file will be saved.</param>
-	/// <param name="template">The template to be serialized to JSON and saved to the path.</param>
-	/// <returns>A message indicating the success of the operation, including the name of the template object and the path where the JSON file is saved.</returns>
+	/// <param name="item">The item to be serialized to JSON and saved to the path.</param>
+	/// <returns>A message indicating the success of the operation, including the name of the item and the path where the JSON file is saved.</returns>
 	/// <exception cref="IOException">If an I/O error occurs while writing the JSON file.</exception>"
 	/// <exception cref="ArgumentNullException">If the `path` is `null` or empty.</exception>
-	protected string SaveTemplateToFile<T>(string path, T template) where T : class, new()
+	protected string SerializeAndSaveFile<T>(string path, T item) where T : class, new()
 	{
 		ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
-		string json = JsonSerializer.Serialize(template, _nullableJsonSerializerOptions);
+		string json = JsonSerializer.Serialize(item, _jsonSerializerOptions);
 		File.WriteAllText(path, json);
 		return $"'{typeof(T).Name.SplitCamelCase().Capitalize()}' template JSON file saved to '{path}'.";
+	}
+
+	protected T LoadTemplateFromFile<T>(string inputPath)
+	{
+		ArgumentException.ThrowIfNullOrEmpty(inputPath, nameof(inputPath));
+		string json = File.ReadAllText(inputPath);
+		if (string.IsNullOrWhiteSpace(json))
+			throw new ArgumentException($"The file '{inputPath}' is empty.", nameof(inputPath));
+		return JsonSerializer.Deserialize<T>(json, _jsonSerializerOptions)!;
 	}
 
 	protected async Task<T> CreateAsync<T>(T entity) where T : class

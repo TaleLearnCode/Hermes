@@ -10,6 +10,7 @@ public class PresentationRequest
 	public string PrivateRepoLink { get; set; }
 	public string Permalink { get; set; }
 	public bool IsArchived { get; set; } = false;
+	public bool IncludeInPublicProfile { get; internal set; }
 	public string DefaultLanguageCode { get; set; } = "en";
 	public List<PresentationTextRequest> Texts { get; set; } = [];
 	public List<string> Tags { get; set; } = [];

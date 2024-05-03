@@ -36,7 +36,7 @@ public partial class Presentation
     public string PrivateRepoLink { get; set; }
 
     /// <summary>
-    /// The permament link for the presentation.
+    /// The permanent link for the presentation.
     /// </summary>
     public string Permalink { get; set; }
 
