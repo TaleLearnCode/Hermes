@@ -85,6 +85,12 @@ internal static class PresentationExtensions
 		response.AppendLine($"## {MarkdownPresentationHeadings.LearningObjectives}");
 		foreach (LearningObjective learningObjective in presentationText.LearningObjectives)
 			response.AppendLine($"- {learningObjective.LearningObjectiveText}");
+		response.AppendLine($"## {MarkdownPresentationHeadings.Resources}");
+		response.AppendLine(presentation.Resources);
+		response.AppendLine();
+		response.AppendLine($"## {MarkdownPresentationHeadings.AdditionalDetails}");
+		response.AppendLine(presentationText.AdditionalDetails);
+
 
 		return response.ToString();
 

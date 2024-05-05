@@ -7,130 +7,40 @@ namespace Hermes.Services;
 public class PresentationServices(string databaseConnectionString) : ServicesBase(databaseConnectionString)
 {
 
-	/// <summary>
-	/// Saves a template object of type `Presentation` as a JSON file at the specified `path`.
-	/// </summary>
-	/// <param name="path">The file path where the JSON file will be saved.</param>
-	/// <returns>A message indicating the success of the operation, including the name of the template object and the path where the JSON file is saved.</returns>
-	/// <exception cref="IOException">If an I/O error occurs while writing the JSON file.</exception>
-	public async Task<string> GetTemplateAsync(string path)
+	public async Task<string> GetTemplateAsync(string path, InputOutputFormat outputFormat)
 	{
 
 		List<PresentationType> presentationTypes = await GetWhereAsync<PresentationType>(x => x.IsEnabled == true);
 		List<PresentationStatus> presentationStatuses = await GetWhereAsync<PresentationStatus>(x => x.IsEnabled == true);
 
-		PresentationRequest template = new()
+		MarkdownPresentationRequest template = new()
 		{
-			Type = $"Required -  The type of presentation [{string.Join(", ", presentationTypes.Select(x => x.PresentationTypeName))}]",
-			Status = $"Required - The status of the presentation [{string.Join(", ", presentationStatuses.Select(x => x.PresentationStatusName))}]",
+			PresentationType = $"Required -  The type of presentation [{string.Join(", ", presentationTypes.Select(x => x.PresentationTypeName))}]",
+			PresentationStatus = $"Required - The status of the presentation [{string.Join(", ", presentationStatuses.Select(x => x.PresentationStatusName))}]",
 			PublicRepoLink = "Optional - The public repository link of the presentation",
 			PrivateRepoLink = "Optional - The private repository link of the presentation",
 			Permalink = "Required - The permalink of the presentation; used as the identifier",
 			DefaultLanguageCode = "Optional - The default language code of the presentation; default is en.",
-			Texts =
-			[
-				new() {
-					LanguageCode = "Required - The default language code of the presentation",
-					Title = "Required - The title of the presentation",
-					ShortTitle = "Optional - The short title of the presentation",
-					Abstract = "Optional - The abstract of the presentation",
-					ShortAbstract = "Optional - The short abstract of the presentation",
-					ElevatorPitch = "Optional - The elevator pitch of the presentation",
-					AdditionalDetails = "Optional - Additional details of the presentation",
-					LearningObjectives =
-					[
-						new() {
-							Text = "Required - The text of the learning objective",
-						}
-					]
-				}
-			],
-			Tags = ["Optional - one or more tags associated with the presentation."]
+			Title = "Required - The title of the presentation",
+			ShortTitle = "Optional - The short title of the presentation",
+			Abstract = "Optional - The abstract of the presentation",
+			ShortAbstract = "Optional - The short abstract of the presentation",
+			ElevatorPitch = "Optional - The elevator pitch of the presentation",
+			AdditionalDetails = "Optional - Additional details of the presentation",
+			LearningObjectives = ["Optional - The text of the learning objective"],
+			Tags = ["Optional - one or more tags associated with the presentation."],
+			Resources = "Optional - The resources used in the presentation.",
+			Thumbnail = "Optional - The URL of the primary thumbnail for the presentation."
 		};
 
-		return SerializeAndSaveFile(path, template);
+		if (outputFormat == InputOutputFormat.Json)
+			return SerializeAndSaveFile(path, template);
+		else if (outputFormat == InputOutputFormat.Markdown)
+			return SaveFile<MarkdownPresentationRequest>(path, template.ToMarkdown());
+		else
+			return "[red] Unsupported output format.[/]";
+
 	}
-
-	//public async Task<string> AddPresentationFromMarkdownAsync(string inputPath, string? outputPath, MarkdownPresentationRequest markdownPresentationRequest)
-	//{
-	//	string markdown = File.ReadAllText(inputPath);
-	//	if (string.IsNullOrWhiteSpace(markdown))
-	//		throw new ArgumentException($"The file '{inputPath}' is empty.", nameof(inputPath));
-	//	else if (IsMarkdownValid(markdown))
-	//		throw new ArgumentException($"The markdown file '{inputPath}' is invalid.", nameof(inputPath));
-
-	//	List<string> markdownLines = [.. File.ReadAllLines(@"C:\Presentations\ArchitectLikeABoss\README.md")];
-
-	//	string? currentOperation = null;
-	//	int presentationsHeaderLinesSkipped = 0;
-
-	//	List<Tag> tags = await GetAllAsync<Tag>();
-
-	//	Presentation presentation = new()
-	//	{
-	//		PresentationStatus = await GetPresentationStatusAsync(markdownPresentationRequest.Status),
-	//		DefaultLanguageCode = markdownPresentationRequest.LanguageCode,
-	//		PublicRepoLink = markdownPresentationRequest.PublicRepoLink,
-	//		PrivateRepoLink = markdownPresentationRequest.PrivateRepoLink,
-	//		IncludeInPublicProfile = markdownPresentationRequest.IncludeInPublicProfile,
-	//		IsArchived = markdownPresentationRequest.IsArchived
-	//	};
-	//	PresentationText presentationText = new() { LanguageCode = markdownPresentationRequest.LanguageCode };
-
-	//	Dictionary<string, Action<string>> operationHandlers = new()
-	//	{
-	//		{ "## Elevator Pitch", line => presentationText.ElevatorPitch += line.TrimEnd('\n') },
-	//		{ "## Short Abstract", line => presentationText.ShortAbstract += line.TrimEnd('\n') },
-	//		{ "## Abstract", line => presentationText.Abstract += line.TrimEnd('\n') },
-	//		{ "## Type", async line => presentation.PresentationType = await GetPresentationTypeAsync(line.TrimEnd('\n')) },
-	//		{ "## Tags", async line => presentation.PresentationTags.Add(await GetNewPresentationTagAsync(line.TrimEnd('\n'))) },
-	//		{ "## Learning Objectives", line => presentationText.LearningObjectives.Add(new()
-	//		{
-	//			LearningObjectiveText = line.TrimEnd('\n'),
-	//			SortOrder = presentationText.LearningObjectives.Count + 1
-	//		}) },
-	//		{ "## Presentations", line => ParseEngagement(line.TrimEnd('\n'), presentation) }
-	//	};
-
-
-	//	foreach (string line in markdownLines)
-	//	{
-	//		if (line.StartsWith("# "))
-	//		{
-	//			presentationText.PresentationTitle = line[2..];
-	//			if (presentationText.PresentationTitle.Contains(':'))
-	//				presentationText.PresentationShortTitle = presentationText.PresentationTitle[..presentationText.PresentationTitle.IndexOf(':')];
-	//		}
-	//		else if (line.StartsWith('!') && line.Contains("Thumbnail.jpg"))
-	//		{
-	//			presentation.ThumbnailUrl = line.Substring(line.IndexOf("(") + 1, line.IndexOf(")") - line.IndexOf("(") - 1);
-	//		}
-	//		else if (!line.StartsWith("##"))
-	//		{
-	//			if (currentOperation != null && operationHandlers.TryGetValue(currentOperation, out Action<string>? value))
-	//				value(line);
-	//		}
-	//		else if (operationHandlers.ContainsKey(line))
-	//		{
-	//			currentOperation = line;
-	//		}
-	//		else
-	//		{
-	//			currentOperation = null;
-	//		}
-	//	}
-
-	//	presentation.PresentationTexts.Add(presentationText);
-	//	presentation.Permalink = presentationText.PresentationShortTitle.ToKebabCase();
-
-	//	presentation = await CreateAsync(presentation);
-
-	//	if (outputPath != StaticValues.NoEntryDefault)
-	//		SerializeAndSaveFile(outputPath ?? $"{presentation.Permalink}.json", presentation.ToPresentationRequest());
-
-	//	return $"The presentation '{presentation.Permalink}' was successfully added to the database.";
-
-	//}
 
 	public static async Task<MarkdownPresentationRequest> BuildPresentationRequestFromMarkdownAsync(string inputPath)
 	{

@@ -25,11 +25,13 @@ internal class Presentations(string databaseConnectionString)
 
 	private void InitializeTemplateCommand(Command presentationCommand)
 	{
-		Option<string> outputOption = new(["--output", "-o"], () => "presentations.json", "Name of path of the outputted JSON file.");
+		Option<string> outputOption = new(["--output", "-o"], () => "add-presentation.md", "Name of path of the outputted JSON file.");
+		Option<string> outputFormatOption = new(["--outputFormat", "-of"], "The format of the output file. Must be 'markdown' or 'json'.");
 		Command templateCommand = new("template", "Returns a template to add a presentation.");
 		templateCommand.AddOption(outputOption);
+		templateCommand.AddOption(outputFormatOption);
 		presentationCommand.AddCommand(templateCommand);
-		templateCommand.SetHandler(GetTemplateAsync, outputOption);
+		templateCommand.SetHandler(GetTemplateAsync, outputOption, outputFormatOption);
 	}
 
 	private void InitializeAddCommand(Command presentationCommand)
@@ -50,17 +52,31 @@ internal class Presentations(string databaseConnectionString)
 
 	#endregion
 
-	private async Task GetTemplateAsync(string output)
+	private async Task GetTemplateAsync(string outputPath, string? outputFormatOption)
 	{
-		if (File.Exists(output) && !AnsiConsole.Confirm("The specified output path exists; do you want to overwrite?"))
+
+		if (File.Exists(outputPath) && !AnsiConsole.Confirm("The specified output path exists; do you want to overwrite?"))
 			return;
+
+		if (outputFormatOption is not null && !Enum.TryParse<InputOutputFormat>(outputFormatOption, true, out InputOutputFormat outputFormat))
+			throw new ArgumentException($"The specified output format '{outputFormatOption}' is invalid. Please specify 'markdown' or 'json'.");
+		else if (outputFormatOption is null)
+			outputFormat = Path.GetExtension(outputPath) switch
+			{
+				".md" => InputOutputFormat.Markdown,
+				".json" => InputOutputFormat.Json,
+				_ => throw new ArgumentException("The output file format is not supported. Please specify 'markdown' or 'json'.")
+			};
+		else
+			outputFormat = InputOutputFormat.Console;
+
 		string status = string.Empty;
 		await AnsiConsole.Status()
 			.Spinner(Spinner.Known.Dots8Bit)
 			.SpinnerStyle(Style.Parse("green bold"))
 			.StartAsync("Generating template...", async ctx =>
 			{
-				status = await _presentationServices.GetTemplateAsync(output);
+				status = await _presentationServices.GetTemplateAsync(outputPath, outputFormat);
 			});
 		Console.WriteLine(status);
 	}
