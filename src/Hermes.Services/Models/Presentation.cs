@@ -36,9 +36,14 @@ public partial class Presentation
     public string PrivateRepoLink { get; set; }
 
     /// <summary>
-    /// The permanent link for the presentation.
+    /// The permament link for the presentation.
     /// </summary>
     public string Permalink { get; set; }
+
+    /// <summary>
+    /// The original thumbnail image for the presentation.
+    /// </summary>
+    public string OriginalThumbnailUrl { get; set; }
 
     /// <summary>
     /// Flag indicating whether the presentation has been archived.
@@ -54,6 +59,11 @@ public partial class Presentation
     /// The default language to use for the presentation.
     /// </summary>
     public string DefaultLanguageCode { get; set; }
+
+    /// <summary>
+    /// The resources for the presentation.
+    /// </summary>
+    public string Resources { get; set; }
 
     public virtual Language DefaultLanguageCodeNavigation { get; set; }
 

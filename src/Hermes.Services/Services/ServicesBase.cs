@@ -1,14 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using Markdig;
 
 namespace Hermes.Services;
 
 public abstract class ServicesBase
 {
 
-	private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+	protected readonly JsonSerializerOptions _jsonSerializerOptions = new()
 	{
 		Converters = { new JsonStringEnumConverter() },
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -48,8 +45,13 @@ public abstract class ServicesBase
 	{
 		ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
 		string json = JsonSerializer.Serialize(item, _jsonSerializerOptions);
-		File.WriteAllText(path, json);
-		return $"'{typeof(T).Name.SplitCamelCase().Capitalize()}' template JSON file saved to '{path}'.";
+		return SaveFile<T>(path, json);
+	}
+
+	protected static string SaveFile<T>(string path, string contents)
+	{
+		File.WriteAllText(path, contents);
+		return $"'{typeof(T).Name.SplitCamelCase().Capitalize()}' file saved to '{path}'.";
 	}
 
 	protected T LoadTemplateFromFile<T>(string inputPath)
@@ -91,7 +93,7 @@ public abstract class ServicesBase
 		await context.SaveChangesAsync();
 	}
 
-	protected async Task<T> GetAsync<T>(int id) where T : class
+	protected async Task<T?> GetAsync<T>(int id) where T : class
 	{
 		using HermesContext context = new(_databaseConnectionString);
 		return await context.Set<T>().FindAsync(id);
@@ -109,7 +111,7 @@ public abstract class ServicesBase
 		return await context.Set<T>().Where(predicate).ToListAsync();
 	}
 
-	protected async Task<T> GetFirstOrDefaultAsync<T>(Expression<Func<T, bool>> predicate) where T : class
+	protected async Task<T?> GetFirstOrDefaultAsync<T>(Expression<Func<T, bool>> predicate) where T : class
 	{
 		using HermesContext context = new(_databaseConnectionString);
 		return await context.Set<T>().FirstOrDefaultAsync(predicate);
@@ -131,6 +133,19 @@ public abstract class ServicesBase
 	{
 		using HermesContext context = new(_databaseConnectionString);
 		return await context.Set<T>().AnyAsync(predicate);
+	}
+
+	protected static bool IsMarkdownValid(string markdown)
+	{
+		try
+		{
+			Markdown.Parse(markdown);
+			return true;
+		}
+		catch (Exception)
+		{
+			return false;
+		}
 	}
 
 }
