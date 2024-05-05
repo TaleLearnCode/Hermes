@@ -150,26 +150,130 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			PresentationTags = await GetNewPresentationTagsAsync(presentationRequest)
 		});
 
-		outputFormat ??= inputFormat;
-		if (!string.IsNullOrWhiteSpace(outputPath) && outputFormat != InputOutputFormat.Console)
-		{
-			using HermesContext context = new(_databaseConnectionString);
-			presentation = await context.Presentations
-				.Include(x => x.PresentationType)
-				.Include(x => x.PresentationStatus)
-				.Include(x => x.PresentationTexts)
-					.ThenInclude(x => x.LearningObjectives)
-				.Include(x => x.PresentationTags)
-					.ThenInclude(x => x.Tag)
-				.FirstAsync(x => x.PresentationId == presentation.PresentationId);
-			if (outputFormat == InputOutputFormat.Json)
-				SerializeAndSaveFile(outputPath ?? $"{presentation.Permalink}.json", presentation.ToPresentationRequest());
-			else if (outputFormat == InputOutputFormat.Markdown)
-				SaveFile<Presentation>(outputPath ?? $"{presentation.Permalink}.md", presentation.ToMarkdown());
-
-		}
+		await SaveOutputAsync(presentation, presentation.Permalink, outputPath, inputFormat, outputFormat);
 
 		return $"The presentation '{presentation.Permalink}' was successfully added to the database.";
+	}
+
+	public async Task<string> UpdatePresentationAsync(
+		PresentationRequest presentationRequest,
+		InputOutputFormat inputFormat,
+		string? outputPath,
+		InputOutputFormat? outputFormat)
+	{
+		await CreateNewTagsAsync(presentationRequest);
+		Presentation presentation = await GetPresentationAsync(presentationRequest.Permalink)
+			?? throw new ArgumentException($"The presentation with the permalink '{presentationRequest.Permalink}' was not found in the database.");
+		await ValidateRequestAsync(presentationRequest, false);
+		await UpdatePresentationAsync(presentationRequest, presentation);
+		await UpdateAsync(presentation);
+		await SaveOutputAsync(presentation, presentation.Permalink, outputPath, inputFormat, outputFormat);
+		return $"The presentation '{presentation.Permalink}' was successfully updated in the database.";
+	}
+
+	private async Task CreateNewTagsAsync(PresentationRequest presentationRequest)
+	{
+		foreach (string tagName in presentationRequest.Tags)
+		{
+			Tag? tag = await GetFirstOrDefaultAsync<Tag>(x => x.TagName == tagName);
+			if (tag is null)
+			{
+				await CreateAsync<Tag>(new() { TagName = tagName });
+			}
+		}
+	}
+
+	private async Task UpdatePresentationAsync(PresentationRequest presentationRequest, Presentation presentation)
+	{
+		await UpdatePresentationDetailsAsync(presentationRequest, presentation);
+		UpdatePresentationText(presentationRequest, presentation);
+		await UpdatePresentationTags(presentationRequest, presentation);
+	}
+
+	private async Task UpdatePresentationDetailsAsync(PresentationRequest presentationRequest, Presentation presentation)
+	{
+		presentation.PresentationTypeId = (await GetFirstOrDefaultAsync<PresentationType>(x => x.PresentationTypeName == presentationRequest.PresentationType))!.PresentationTypeId;
+		presentation.PresentationStatusId = (await GetFirstOrDefaultAsync<PresentationStatus>(x => x.PresentationStatusName == presentationRequest.PresentationStatus))!.PresentationStatusId;
+		presentation.PublicRepoLink = presentationRequest.PublicRepoLink;
+		presentation.PrivateRepoLink = presentationRequest.PrivateRepoLink;
+		presentation.OriginalThumbnailUrl = presentationRequest.Thumbnail;
+		presentation.IsArchived = presentationRequest.IsArchived;
+		presentation.IncludeInPublicProfile = presentationRequest.IncludeInPublicProfile;
+		presentation.DefaultLanguageCode = presentationRequest.DefaultLanguageCode;
+		presentation.Resources = presentationRequest.Resources;
+	}
+
+	private static void UpdatePresentationText(PresentationRequest presentationRequest, Presentation presentation)
+	{
+		PresentationText presentationText = presentation.PresentationTexts
+			.FirstOrDefault(x => x.PresentationId == presentation.PresentationId)
+			?? GetNewPresentationText(presentationRequest);
+		presentationText.PresentationTitle = presentationRequest.Title;
+		presentationText.PresentationShortTitle = presentationRequest.ShortTitle;
+		presentationText.Abstract = presentationRequest.Abstract;
+		presentationText.ShortAbstract = presentationRequest.ShortAbstract;
+		presentationText.ElevatorPitch = presentationRequest.ElevatorPitch;
+		presentationText.AdditionalDetails = presentationRequest.AdditionalDetails;
+		presentationText.LearningObjectives = UpdateLearningObjectives(presentationRequest, presentationText);
+	}
+
+	private static List<LearningObjective> UpdateLearningObjectives(PresentationRequest presentationRequest, PresentationText presentationText)
+	{
+		List<LearningObjective> learningObjectives = [.. presentationText.LearningObjectives.OrderBy(x => x.SortOrder)];
+		for (int i = 0; i < presentationRequest.LearningObjectives.Count; i++)
+		{
+			if (learningObjectives.Count >= i)
+			{
+				learningObjectives[i].LearningObjectiveText = presentationRequest.LearningObjectives[i];
+			}
+			else
+			{
+				learningObjectives.Add(new LearningObjective()
+				{
+					LearningObjectiveText = presentationRequest.LearningObjectives[i],
+					SortOrder = i + 1
+				});
+			}
+		}
+		return learningObjectives;
+	}
+
+	private async Task UpdatePresentationTags(PresentationRequest presentationRequest, Presentation presentation)
+	{
+		RemoveDeletedPresentationTags(presentationRequest, presentation);
+		await AddNewPresentationTagsAsync(presentationRequest, presentation);
+	}
+
+	private async Task AddNewPresentationTagsAsync(PresentationRequest presentationRequest, Presentation presentation)
+	{
+		foreach (string tagName in presentationRequest.Tags)
+		{
+			bool tagPresent = false;
+			foreach (PresentationTag presentationTag in presentation.PresentationTags)
+			{
+				if (presentationTag.Tag.TagName == tagName)
+				{
+					tagPresent = true;
+					break;
+				}
+			}
+			if (!tagPresent)
+			{
+				presentation.PresentationTags.Add(new()
+				{
+					Tag = await GetFirstOrDefaultAsync<Tag>(x => x.TagName == tagName)
+				});
+			}
+		}
+	}
+
+	private static void RemoveDeletedPresentationTags(PresentationRequest presentationRequest, Presentation presentation)
+	{
+		foreach (PresentationTag presentationTag in presentation.PresentationTags)
+		{
+			if (!presentationRequest.Tags.Contains(presentationTag.Tag.TagName))
+				presentation.PresentationTags.Remove(presentationTag);
+		}
 	}
 
 	/// <summary>
@@ -248,6 +352,11 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 
 	private static List<PresentationText> GetNewPresentationTexts(PresentationRequest presentationRequest)
 	{
+		return [GetNewPresentationText(presentationRequest)];
+	}
+
+	private static PresentationText GetNewPresentationText(PresentationRequest presentationRequest)
+	{
 		PresentationText presentationText = new()
 		{
 			LanguageCode = presentationRequest.DefaultLanguageCode,
@@ -266,9 +375,12 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 				SortOrder = presentationText.LearningObjectives.Count + 1
 			});
 		}
-		return [presentationText];
+		return presentationText;
 	}
-	private async Task ValidateRequestAsync(PresentationRequest presentationRequest)
+
+	private async Task ValidateRequestAsync(
+		PresentationRequest presentationRequest,
+		bool checkPermalinkForUniqueness = true)
 	{
 
 		ArgumentException.ThrowIfNullOrWhiteSpace(presentationRequest.PresentationType, nameof(presentationRequest.PresentationType));
@@ -282,9 +394,12 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		if ((await GetFirstOrDefaultAsync<Language>(x => x.LanguageCode == presentationRequest.DefaultLanguageCode)) is null)
 			throw new ArgumentException($"Invalid language code; '{presentationRequest.DefaultLanguageCode}' was not found in the database.");
 
-		Presentation? presentation = await GetFirstOrDefaultAsync<Presentation>(x => x.Permalink == presentationRequest.Permalink);
-		if (presentation is not null)
-			throw new ArgumentException($"The presentation with the permalink '{presentationRequest.Permalink}' already exists in the database.");
+		if (checkPermalinkForUniqueness)
+		{
+			Presentation? presentation = await GetFirstOrDefaultAsync<Presentation>(x => x.Permalink == presentationRequest.Permalink);
+			if (presentation is not null)
+				throw new ArgumentException($"The presentation with the permalink '{presentationRequest.Permalink}' already exists in the database.");
+		}
 
 		if (presentationRequest.Permalink?.Length > 200)
 			throw new ArgumentException($"The permalink '{presentationRequest.Permalink}' exceeds the maximum length of 200 characters.");
@@ -355,6 +470,40 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			return attributeValue;
 
 		return false;
+	}
+
+	private async Task<Presentation?> GetPresentationAsync(string permalink)
+	{
+		using HermesContext context = new(_databaseConnectionString);
+		return await context.Presentations
+			.Include(x => x.PresentationType)
+			.Include(x => x.PresentationStatus)
+			.Include(x => x.PresentationTexts)
+				.ThenInclude(x => x.LearningObjectives)
+			.Include(x => x.PresentationTags)
+				.ThenInclude(x => x.Tag)
+			.FirstAsync(x => x.Permalink == permalink);
+	}
+
+	private async Task SaveOutputAsync(
+		Presentation? presentation,
+		string permalink,
+		string? outputPath,
+		InputOutputFormat inputFormat,
+		InputOutputFormat? outputFormat)
+	{
+		outputFormat ??= inputFormat;
+		if (!string.IsNullOrWhiteSpace(outputPath) && outputFormat != InputOutputFormat.Console)
+		{
+			presentation ??= await GetPresentationAsync(permalink);
+			if (presentation is not null)
+			{
+				if (outputFormat == InputOutputFormat.Json)
+					SerializeAndSaveFile(outputPath ?? $"{presentation.Permalink}.json", presentation.ToPresentationRequest());
+				else if (outputFormat == InputOutputFormat.Markdown)
+					SaveFile<Presentation>(outputPath ?? $"{presentation.Permalink}.md", presentation.ToMarkdown());
+			}
+		}
 	}
 
 }
