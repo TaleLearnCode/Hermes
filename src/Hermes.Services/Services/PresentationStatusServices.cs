@@ -15,6 +15,7 @@ public class PresentationStatusServices(string databaseConnectionString) : Servi
 	/// Retrieves a list of all presentation statuses.
 	/// </summary>
 	/// <returns>A list of presentation statuses.</returns>
-	public async Task<List<PresentationStatus>> GetListAsync() => await GetAllAsync<PresentationStatus>();
+	public async Task<List<PresentationStatus>> GetListAsync()
+		=> [.. (await GetAllAsync<PresentationStatus>()).OrderBy(x => x.SortOrder)];
 
 }
