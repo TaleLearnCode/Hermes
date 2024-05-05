@@ -5,7 +5,7 @@ namespace Hermes.Services;
 public abstract class ServicesBase
 {
 
-	private readonly JsonSerializerOptions _jsonSerializerOptions = new()
+	protected readonly JsonSerializerOptions _jsonSerializerOptions = new()
 	{
 		Converters = { new JsonStringEnumConverter() },
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -45,8 +45,13 @@ public abstract class ServicesBase
 	{
 		ArgumentException.ThrowIfNullOrEmpty(path, nameof(path));
 		string json = JsonSerializer.Serialize(item, _jsonSerializerOptions);
-		File.WriteAllText(path, json);
-		return $"'{typeof(T).Name.SplitCamelCase().Capitalize()}' template JSON file saved to '{path}'.";
+		return SaveFile<T>(path, json);
+	}
+
+	protected string SaveFile<T>(string path, string contents)
+	{
+		File.WriteAllText(path, contents);
+		return $"'{typeof(T).Name.SplitCamelCase().Capitalize()}' file saved to '{path}'.";
 	}
 
 	protected T LoadTemplateFromFile<T>(string inputPath)

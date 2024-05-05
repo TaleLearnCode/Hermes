@@ -234,7 +234,10 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		return presentationRequest;
 	}
 
-	public string GetPermalink(MarkdownPresentationRequest markdownPresentationRequest)
+	public MarkdownPresentationRequest? BuildPresentationRequestFromJson(string inputPath)
+		=> JsonSerializer.Deserialize<MarkdownPresentationRequest>(File.ReadAllText(inputPath), _jsonSerializerOptions);
+
+	public static string GetPermalink(MarkdownPresentationRequest markdownPresentationRequest)
 	{
 		if (!string.IsNullOrWhiteSpace(markdownPresentationRequest.Permalink))
 		{
@@ -250,7 +253,9 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 
 	public async Task<string> AddPresentation(
 		MarkdownPresentationRequest presentationRequest,
-		string? outputPath)
+		InputOutputFormat inputFormat,
+		string? outputPath,
+		InputOutputFormat? outputFormat)
 	{
 
 		await ValidateRequestAsync(presentationRequest);
@@ -269,7 +274,8 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			PresentationTags = await GetNewPresentationTagsAsync(presentationRequest)
 		});
 
-		if (outputPath != StaticValues.NoEntryDefault)
+		outputFormat ??= inputFormat;
+		if (!string.IsNullOrWhiteSpace(outputPath) && outputFormat != InputOutputFormat.Console)
 		{
 			using HermesContext context = new(_databaseConnectionString);
 			presentation = await context.Presentations
@@ -280,7 +286,10 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 				.Include(x => x.PresentationTags)
 					.ThenInclude(x => x.Tag)
 				.FirstAsync(x => x.PresentationId == presentation.PresentationId);
-			SerializeAndSaveFile(outputPath ?? $"{presentation.Permalink}.json", presentation.ToPresentationResponse());
+			if (outputFormat == InputOutputFormat.Json)
+				SerializeAndSaveFile(outputPath ?? $"{presentation.Permalink}.json", presentation.ToPresentationRequest());
+			else if (outputFormat == InputOutputFormat.Markdown)
+				SaveFile<Presentation>(outputPath ?? $"{presentation.Permalink}.md", presentation.ToMarkdown());
 
 		}
 
@@ -296,7 +305,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 	/// <param name="presentationStatus">The optional presentation status filter.</param>
 	/// <returns>A list of PresentationItemResponse objects representing the presentations.</returns>
 	public async Task<List<PresentationItemResponse>> GetPresentationListAsync(
-		OutputFormat outputFormat,
+		InputOutputFormat outputFormat,
 		string? outputPath,
 		string? presentationType = null,
 		string? presentationStatus = null)
@@ -336,7 +345,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			DefaultLanguageCode = x.DefaultLanguageCode
 		}).ToList();
 
-		if (outputFormat == OutputFormat.Json && outputPath is not null)
+		if (outputFormat == InputOutputFormat.Json && outputPath is not null)
 			SerializeAndSaveFile(outputPath, presentationItems);
 		if (outputPath != StaticValues.NoEntryDefault)
 			SerializeAndSaveFile(outputPath ?? "presentations.json", presentationItems);

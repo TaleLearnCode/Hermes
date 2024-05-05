@@ -6,6 +6,7 @@
   PublicRepoLink         VARCHAR(200)      NULL,
   PrivateRepoLink        VARCHAR(200)      NULL,
   Permalink              VARCHAR(200)  NOT NULL,
+  OriginalThumbnailUrl   VARCHAR(200)      NULL,
   IsArchived             BIT           NOT NULL CONSTRAINT dfPresentation_IsArchived DEFAULT 0,
   IncludeInPublicProfile BIT           NOT NULL CONSTRAINT dfPresentation_IncludeInPublicProfile DEFAULT 1,
   DefaultLanguageCode    CHAR(2)       NOT NULL CONSTRAINT dfPresentation_DefaultLanguageCode DEFAULT 'en',
@@ -30,6 +31,8 @@ GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'Presentation', @level2name=N'PrivateRepoLink',                       @value=N'The link to the private repository for the presentation.',                                                           @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'Presentation', @level2name=N'Permalink',                             @value=N'The permament link for the presentation.',                                                                           @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
+GO
+EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'Presentation', @level2name=N'OriginalThumbnailUrl',                   @value=N'The original thumbnail image for the presentation.',                                                                 @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'Presentation', @level2name=N'IsArchived',                            @value=N'Flag indicating whether the presentation has been archived.',                                                        @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO

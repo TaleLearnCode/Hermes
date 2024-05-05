@@ -1,5 +1,6 @@
 ﻿using Hermes.Models;
 using Hermes.Requests;
+using Hermes.Types;
 
 namespace Hermes.Modules;
 
@@ -34,15 +35,17 @@ internal class Presentations(string databaseConnectionString)
 	private void InitializeAddCommand(Command presentationCommand)
 	{
 		Option<string> inputOption = new(["--input", "-i"], () => string.Empty, "Path to the input JSON file.");
-		Option<string> outputOption = new(["--output", "-o"], () => StaticValues.NoEntryDefault, "Path to the output JSON file.");
-		//Option<string> outputOption = new(["--output", "-o"], "Path to the output JSON file.");
-		Option<string> formatOption = new(["--format", "-f"], "The format of the input file. Must be 'markdown' or 'json'.");
+		Option<string> outputOption = new(["--output", "-o"], () => string.Empty, "Path to the output JSON file.");
+		Option<string> inputFormatOption = new(["--inputFormat", "-if"], "The format of the input file. Must be 'markdown' or 'json'.");
+		Option<string> outputFormatOption = new(["--outputFormat", "-of"], "The format of the output file. Must be 'markdown' or 'json'.");
+
 		Command addCommand = new("add", "Adds a presentation to the database.");
 		addCommand.AddOption(inputOption);
 		addCommand.AddOption(outputOption);
-		addCommand.AddOption(formatOption);
+		addCommand.AddOption(inputFormatOption);
+		addCommand.AddOption(outputFormatOption);
 		presentationCommand.AddCommand(addCommand);
-		addCommand.SetHandler(AddPresentationAsync, inputOption, outputOption, formatOption);
+		addCommand.SetHandler(AddPresentationAsync, inputOption, inputFormatOption, outputOption, outputFormatOption);
 	}
 
 	#endregion
@@ -62,50 +65,15 @@ internal class Presentations(string databaseConnectionString)
 		Console.WriteLine(status);
 	}
 
-	//private async Task AddPresentationAsync(string inputPath, string? outputPath)
-	//{
-	//	try
-	//	{
-	//		if (!File.Exists(inputPath))
-	//		{
-	//			AnsiConsole.MarkupLine($"[red]The specified input file [/][bold red]'{inputPath}'[/][red] does not exist.[/]");
-	//			return;
-	//		}
-	//		if (string.IsNullOrWhiteSpace(outputPath)) outputPath = null;
-	//		if (!string.IsNullOrWhiteSpace(outputPath)
-	//			&& File.Exists(outputPath)
-	//			&& !AnsiConsole.Confirm("The specified output path exists; do you want to overwrite?"))
-	//			return;
-	//		string status = string.Empty;
-	//		await AnsiConsole.Status()
-	//			.Spinner(Spinner.Known.Dots8Bit)
-	//			.SpinnerStyle(Style.Parse("green bold"))
-	//			.StartAsync("Adding presentation...", async ctx =>
-	//			{
-	//				status = await _presentationServices.AddPresentationFromJsonAsync(inputPath, outputPath);
-	//			});
-	//		Console.WriteLine(status);
-	//	}
-	//	catch (ArgumentException ex)
-	//	{
-	//		AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
-	//	}
-	//	catch (Exception ex)
-	//	{
-	//		AnsiConsole.WriteException(ex,
-	//			ExceptionFormats.ShortenPaths
-	//			| ExceptionFormats.ShortenTypes
-	//			| ExceptionFormats.ShortenMethods
-	//			| ExceptionFormats.ShortenEverything
-	//			| ExceptionFormats.NoStackTrace);
-	//	}
-
-	//}
-
-	private async Task AddPresentationAsync(string inputPath, string? outputPath, string format)
+	private async Task AddPresentationAsync(
+		string inputPath,
+		string? inputFormatOption,
+		string? outputPath,
+		string? outputFormatOption)
 	{
 		try
 		{
+
 			if (!File.Exists(inputPath))
 			{
 				AnsiConsole.MarkupLine($"[red]The specified input file [/][bold red]'{inputPath}'[/][red] does not exist.[/]");
@@ -116,28 +84,47 @@ internal class Presentations(string databaseConnectionString)
 				&& File.Exists(outputPath)
 				&& !AnsiConsole.Confirm("The specified output path exists; do you want to overwrite?"))
 				return;
-			string status = string.Empty;
-			//await AnsiConsole.Status()
-			//	.Spinner(Spinner.Known.Dots8Bit)
-			//	.SpinnerStyle(Style.Parse("green bold"))
-			//	.StartAsync("Adding presentation...", async ctx =>
-			//	{
-			//		status = await _presentationServices.AddPresentationFromJsonAsync(inputPath, outputPath);
-			//	});
-			//Console.WriteLine(status);
+
+			if (inputFormatOption is not null && !Enum.TryParse<InputOutputFormat>(inputFormatOption, true, out InputOutputFormat inputFormat))
+				throw new ArgumentException($"The specified input format '{inputFormatOption}' is invalid. Please specify 'markdown' or 'json'.");
+			else if (inputFormatOption is null)
+				inputFormat = Path.GetExtension(inputPath) switch
+				{
+					".md" => InputOutputFormat.Markdown,
+					".json" => InputOutputFormat.Json,
+					_ => throw new ArgumentException("The input file format is not supported. Please specify 'markdown' or 'json'.")
+				};
+			else
+				inputFormat = InputOutputFormat.Console;
 
 
-			status = format switch
+			InputOutputFormat? outputFormat = null;
+			if (!string.IsNullOrWhiteSpace(outputPath))
 			{
-				"markdown" => await AddPresentationFromMarkdown(inputPath, outputPath),
-				"json" => await AddPresentationFromJson(inputPath, outputPath),
-				_ => "[red]Invalid format. Please specify 'markdown' or 'json'.[/]",
+				InputOutputFormat testOutputFormat = InputOutputFormat.Console;
+				if (outputFormatOption is not null && !Enum.TryParse<InputOutputFormat>(outputFormatOption, true, out testOutputFormat))
+					throw new ArgumentException($"The specified output format '{outputFormatOption}' is invalid. Please specify 'markdown' or 'json'.");
+				else if (outputFormatOption is null)
+					testOutputFormat = Path.GetExtension(outputPath) switch
+					{
+						".md" => InputOutputFormat.Markdown,
+						".json" => InputOutputFormat.Json,
+						_ => throw new ArgumentException("The output file format is not supported. Please specify 'markdown' or 'json'.")
+					};
+				outputFormat = testOutputFormat;
+			}
+
+			MarkdownPresentationRequest? presentationRequest = inputFormat switch
+			{
+				InputOutputFormat.Json => _presentationServices.BuildPresentationRequestFromJson(inputPath),
+				InputOutputFormat.Markdown => await _presentationServices.BuildPresentationRequestFromMarkdownAsync(inputPath),
+				_ => null
 			};
-			AnsiConsole.Markup(status);
 
-
-
-
+			if (presentationRequest is null)
+				AnsiConsole.Write("[red]The specified input file is not a valid JSON presentation file.[/]");
+			else
+				AnsiConsole.Write(await AddPresentationFromRequestAsync(presentationRequest, inputFormat, outputPath, outputFormat));
 
 		}
 		catch (ArgumentException ex)
@@ -156,48 +143,17 @@ internal class Presentations(string databaseConnectionString)
 
 	}
 
-	private async Task<string> AddPresentationFromJson(string inputPath, string? outputPath)
+	private async Task<string> AddPresentationFromRequestAsync(
+		MarkdownPresentationRequest presentationRequest,
+		InputOutputFormat inputFormat,
+		string? outputPath,
+		InputOutputFormat? outputFormat)
 	{
-		string status = string.Empty;
-		await AnsiConsole.Status()
-			.Spinner(Spinner.Known.Dots8Bit)
-			.SpinnerStyle(Style.Parse("green bold"))
-			.StartAsync("Adding presentation...", async ctx =>
-			{
-				status = await _presentationServices.AddPresentationFromJsonAsync(inputPath, outputPath);
-			});
-		return status;
-	}
-
-	private async Task<string> AddPresentationFromMarkdown(string inputPath, string? outputPath)
-	{
-		//MarkdownPresentationRequest request = new()
-		//{
-		//	LanguageCode = AnsiConsole.Ask<string>("Language Code: "),
-		//	PublicRepoLink = AnsiConsole.Prompt(new TextPrompt<string>("Public Repo Link: ").AllowEmpty()),
-		//	PrivateRepoLink = AnsiConsole.Prompt(new TextPrompt<string>("Private Repo Link: ").AllowEmpty()),
-		//	Status = AnsiConsole.Ask<string>("Status: "),
-		//	IsArchived = AnsiConsole.Confirm("Not Archived: "),
-		//	IncludeInPublicProfile = AnsiConsole.Confirm("Include in Public Profile: ")
-		//};
-		//string status = string.Empty;
-		//await AnsiConsole.Status()
-		//	.Spinner(Spinner.Known.Dots8Bit)
-		//	.SpinnerStyle(Style.Parse("green bold"))
-		//	.StartAsync("Adding presentation...", async ctx =>
-		//	{
-		//		status = await _presentationServices.AddPresentationFromMarkdownAsync(inputPath, outputPath, request);
-		//	});
-		//return status;
-
-		MarkdownPresentationRequest presentationRequest = await _presentationServices.BuildPresentationRequestFromMarkdownAsync(inputPath);
-		if (presentationRequest is null)
-			return "[red]The specified input file is not a valid Markdown presentation file.[/]";
 
 		if (string.IsNullOrEmpty(presentationRequest.Title))
 			presentationRequest.Title = AnsiConsole.Ask<string>("Title: ");
 		if (string.IsNullOrEmpty(presentationRequest.Permalink))
-			presentationRequest.Permalink = _presentationServices.GetPermalink(presentationRequest);
+			presentationRequest.Permalink = PresentationServices.GetPermalink(presentationRequest);
 
 		PresentationType? presentationType = null;
 		if (!string.IsNullOrWhiteSpace(presentationRequest.PresentationType))
@@ -220,11 +176,12 @@ internal class Presentations(string databaseConnectionString)
 			.SpinnerStyle(Style.Parse("green bold"))
 			.StartAsync("Adding presentation...", async ctx =>
 			{
-				status = await _presentationServices.AddPresentation(presentationRequest, outputPath);
+				status = await _presentationServices.AddPresentation(presentationRequest, inputFormat, outputPath, outputFormat);
 			});
 		return status;
 
 	}
+
 
 	private async Task<PresentationType> GetPresentationType()
 	{

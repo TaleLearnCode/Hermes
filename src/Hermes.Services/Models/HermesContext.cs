@@ -95,6 +95,10 @@ public partial class HermesContext : DbContext
                 .HasDefaultValue(true)
                 .HasComment("Flag indicating whether the presentation is to be include in the public profile.");
             entity.Property(e => e.IsArchived).HasComment("Flag indicating whether the presentation has been archived.");
+            entity.Property(e => e.OriginalThumbnailUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The original thumbnail image for the presentation.");
             entity.Property(e => e.Permalink)
                 .IsRequired()
                 .HasMaxLength(200)
