@@ -48,7 +48,7 @@ public abstract class ServicesBase
 		return SaveFile<T>(path, json);
 	}
 
-	protected string SaveFile<T>(string path, string contents)
+	protected static string SaveFile<T>(string path, string contents)
 	{
 		File.WriteAllText(path, contents);
 		return $"'{typeof(T).Name.SplitCamelCase().Capitalize()}' file saved to '{path}'.";
@@ -93,7 +93,7 @@ public abstract class ServicesBase
 		await context.SaveChangesAsync();
 	}
 
-	protected async Task<T> GetAsync<T>(int id) where T : class
+	protected async Task<T?> GetAsync<T>(int id) where T : class
 	{
 		using HermesContext context = new(_databaseConnectionString);
 		return await context.Set<T>().FindAsync(id);
@@ -111,7 +111,7 @@ public abstract class ServicesBase
 		return await context.Set<T>().Where(predicate).ToListAsync();
 	}
 
-	protected async Task<T> GetFirstOrDefaultAsync<T>(Expression<Func<T, bool>> predicate) where T : class
+	protected async Task<T?> GetFirstOrDefaultAsync<T>(Expression<Func<T, bool>> predicate) where T : class
 	{
 		using HermesContext context = new(_databaseConnectionString);
 		return await context.Set<T>().FirstOrDefaultAsync(predicate);
