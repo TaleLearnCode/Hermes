@@ -1,8 +1,4 @@
-﻿using Hermes.Models;
-using Hermes.Requests;
-using Hermes.Types;
-
-namespace Hermes.Modules;
+﻿namespace Hermes.Modules;
 
 internal class Presentations(string databaseConnectionString)
 {
@@ -92,6 +88,7 @@ internal class Presentations(string databaseConnectionString)
 
 			if (!File.Exists(inputPath))
 			{
+				if (Directory.Exists(inputPath)) await AddPresentationsAsync(inputPath, inputFormatOption, outputPath, outputFormatOption);
 				AnsiConsole.MarkupLine($"[red]The specified input file [/][bold red]'{inputPath}'[/][red] does not exist.[/]");
 				return;
 			}
@@ -142,6 +139,122 @@ internal class Presentations(string databaseConnectionString)
 			else
 				AnsiConsole.Write(await AddPresentationFromRequestAsync(presentationRequest, inputFormat, outputPath, outputFormat));
 
+		}
+		catch (ArgumentException ex)
+		{
+			AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
+		}
+		catch (Exception ex)
+		{
+			AnsiConsole.WriteException(ex,
+				ExceptionFormats.ShortenPaths
+				| ExceptionFormats.ShortenTypes
+				| ExceptionFormats.ShortenMethods
+				| ExceptionFormats.ShortenEverything
+				| ExceptionFormats.NoStackTrace);
+		}
+
+	}
+
+	private async Task AddPresentationsAsync(
+		string inputPath,
+		string? inputFormatOption,
+		string? outputPath,
+		string? outputFormatOption)
+	{
+		try
+		{
+
+			if (!Directory.Exists(inputPath))
+			{
+				AnsiConsole.MarkupLine($"[red]The specified input path [/][bold red]'{inputPath}'[/][red] does not exist.[/]");
+				return;
+			}
+			if (string.IsNullOrWhiteSpace(outputPath)) outputPath = null;
+			if (!string.IsNullOrWhiteSpace(outputPath)
+				&& File.Exists(outputPath)
+				&& !AnsiConsole.Confirm("The specified output path exists; do you want to overwrite?"))
+				return;
+
+			InputOutputFormat inputFormat = InputOutputFormat.Console;
+			if (inputFormatOption is not null && !Enum.TryParse<InputOutputFormat>(inputFormatOption, true, out inputFormat))
+			{
+				throw new ArgumentException($"The specified input format '{inputFormatOption}' is invalid. Please specify 'markdown' or 'json'.");
+			}
+			else if (inputFormatOption is null)
+			{
+				inputFormat = Path.GetExtension(inputPath) switch
+				{
+					".md" => InputOutputFormat.Markdown,
+					".json" => InputOutputFormat.Json,
+					_ => throw new ArgumentException("The input file format is not supported. Please specify 'markdown' or 'json'.")
+				};
+			}
+			//else
+			//{
+			//	inputFormat = InputOutputFormat.Console;
+			//}
+
+			InputOutputFormat? outputFormat = null;
+			if (!string.IsNullOrWhiteSpace(outputPath))
+			{
+				InputOutputFormat testOutputFormat = InputOutputFormat.Console;
+				if (outputFormatOption is not null && !Enum.TryParse<InputOutputFormat>(outputFormatOption, true, out testOutputFormat))
+					throw new ArgumentException($"The specified output format '{outputFormatOption}' is invalid. Please specify 'markdown' or 'json'.");
+				else if (outputFormatOption is null)
+					testOutputFormat = Path.GetExtension(outputPath) switch
+					{
+						".md" => InputOutputFormat.Markdown,
+						".json" => InputOutputFormat.Json,
+						_ => throw new ArgumentException("The output file format is not supported. Please specify 'markdown' or 'json'.")
+					};
+				outputFormat = testOutputFormat;
+			}
+
+			string[] inputFilePaths = Directory.GetFiles(inputPath, $"*.{(inputFormat == InputOutputFormat.Json ? "json" : "md")}", SearchOption.TopDirectoryOnly);
+			if (inputFilePaths.Length == 0)
+			{
+				if (AnsiConsole.Confirm("Unable to file files matching the specified format in the specified directory. Do you want to press all files?"))
+					inputFilePaths = Directory.GetFiles(inputPath, "*.*", SearchOption.TopDirectoryOnly);
+			}
+			if (inputFilePaths.Length == 0)
+			{
+				AnsiConsole.MarkupLine("[red]No files found in the specified directory.[/]");
+				return;
+			}
+
+			foreach (string inputFilePath in inputFilePaths)
+			{
+				AnsiConsole.MarkupLine($"[bold]Processing file:[/] {inputFilePath}");
+				try
+				{
+					PresentationRequest? presentationRequest = inputFormat switch
+					{
+						InputOutputFormat.Json => _presentationServices.BuildPresentationRequestFromJson(inputFilePath),
+						InputOutputFormat.Markdown => await PresentationServices.BuildPresentationRequestFromMarkdownAsync(inputFilePath),
+						_ => null
+					};
+
+					if (presentationRequest is null)
+						AnsiConsole.Write("[red]The specified input file is not a valid JSON presentation file.[/]");
+					else
+						AnsiConsole.WriteLine(await AddPresentationFromRequestAsync(presentationRequest, inputFormat, outputPath, outputFormat));
+
+				}
+				catch (ArgumentException ex)
+				{
+					AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
+				}
+				catch (Exception ex)
+				{
+					AnsiConsole.WriteException(ex,
+						ExceptionFormats.ShortenPaths
+						| ExceptionFormats.ShortenTypes
+						| ExceptionFormats.ShortenMethods
+						| ExceptionFormats.ShortenEverything
+						| ExceptionFormats.NoStackTrace);
+				}
+			}
 		}
 		catch (ArgumentException ex)
 		{
