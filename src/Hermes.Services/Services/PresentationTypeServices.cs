@@ -15,6 +15,7 @@ public class PresentationTypeServices(string databaseConnectionString) : Service
 	/// Retrieves a list of all presentation types.
 	/// </summary>
 	/// <returns>A list of presentation types.</returns>
-	public async Task<List<PresentationType>> GetListAsync() => await GetAllAsync<PresentationType>();
+	public async Task<List<PresentationType>> GetListAsync()
+		=> [.. (await GetAllAsync<PresentationType>()).OrderBy(x => x.SortOrder)];
 
 }
