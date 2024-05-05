@@ -2,7 +2,7 @@
   "profiles": {
     "Hermes": {
       "commandName": "Project",
-      "commandLineArgs": "presentations add -i C:\\Temp\\Presentations\\architect-like-a-boss.md",
+      "commandLineArgs": "presentations remove --permalink architect-like-a-boss",
       "workingDirectory": "C:\\Repos\\Hermes\\src\\Hermes\\bin\\Debug\\net8.0"
     }
   }
