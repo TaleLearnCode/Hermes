@@ -130,7 +130,7 @@ internal class Presentations(string databaseConnectionString)
 				outputFormat = testOutputFormat;
 			}
 
-			MarkdownPresentationRequest? presentationRequest = inputFormat switch
+			PresentationRequest? presentationRequest = inputFormat switch
 			{
 				InputOutputFormat.Json => _presentationServices.BuildPresentationRequestFromJson(inputPath),
 				InputOutputFormat.Markdown => await PresentationServices.BuildPresentationRequestFromMarkdownAsync(inputPath),
@@ -160,7 +160,7 @@ internal class Presentations(string databaseConnectionString)
 	}
 
 	private async Task<string> AddPresentationFromRequestAsync(
-		MarkdownPresentationRequest presentationRequest,
+		PresentationRequest presentationRequest,
 		InputOutputFormat inputFormat,
 		string? outputPath,
 		InputOutputFormat? outputFormat)

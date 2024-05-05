@@ -1,5 +1,4 @@
-﻿using Hermes.Responses;
-using Hermes.Types;
+﻿using Hermes.Types;
 using Spectre.Console;
 using System.Text;
 
@@ -8,43 +7,33 @@ namespace Hermes.Extensions;
 internal static class PresentationExtensions
 {
 
-	internal static PresentationRequest ToPresentationRequest(this Presentation input)
-		=> new()
+	internal static PresentationRequest ToPresentationRequest(this Presentation presentation)
+	{
+		PresentationText presentationText = presentation.PresentationTexts
+			.Where(x => x.LanguageCode == presentation.DefaultLanguageCode).FirstOrDefault()
+			?? presentation.PresentationTexts.First();
+		return new()
 		{
-			//LanguageCode = input.LanguageCode,
-			//Title = input.PresentationTitle,
-			//ShortTitle = input.PresentationShortTitle,
-			//Abstract = input.Abstract,
-			//ShortAbstract = input.ShortAbstract,
-			//ElevatorPitch = input.ElevatorPitch,
-			//AdditionalDetails = input.AdditionalDetails,
-			//LearningObjectives = input.LearningObjectives.Select(x => x.ToLearningObjectiveRequest()).ToList()
-			Type = input.PresentationType.PresentationTypeName,
-			Status = input.PresentationStatus.PresentationStatusName,
-			PublicRepoLink = input.PublicRepoLink,
-			PrivateRepoLink = input.PrivateRepoLink,
-			Permalink = input.Permalink,
-			IsArchived = input.IsArchived,
-			IncludeInPublicProfile = input.IncludeInPublicProfile,
-			DefaultLanguageCode = input.DefaultLanguageCode,
-			Texts = input.PresentationTexts.Select(x => x.ToPresentationTextRequest()).ToList(),
-			Tags = input.PresentationTags.Select(x => x.Tag.TagName).ToList()
+			Title = presentationText.PresentationTitle,
+			ShortTitle = presentationText.PresentationShortTitle,
+			ElevatorPitch = presentationText.ElevatorPitch,
+			ShortAbstract = presentationText.ShortAbstract,
+			Abstract = presentationText.Abstract,
+			Resources = presentation.Resources,
+			AdditionalDetails = presentationText.AdditionalDetails,
+			Permalink = presentation.Permalink,
+			PresentationType = presentation.PresentationType.PresentationTypeName,
+			PresentationStatus = presentation.PresentationStatus.PresentationStatusName,
+			PublicRepoLink = presentation.PublicRepoLink.ToString(),
+			PrivateRepoLink = presentation.PrivateRepoLink.ToString(),
+			Thumbnail = presentation.OriginalThumbnailUrl.ToString(),
+			IncludeInPublicProfile = presentation.IncludeInPublicProfile,
+			DefaultLanguageCode = presentation.DefaultLanguageCode,
+			IsArchived = presentation.IsArchived,
+			LearningObjectives = presentationText.LearningObjectives.Select(x => x.LearningObjectiveText).ToList(),
+			Tags = presentation.PresentationTags.Select(x => x.Tag.TagName).ToList()
 		};
-
-	internal static PresentationResponse ToPresentationResponse(this Presentation input)
-		=> new()
-		{
-			Type = input.PresentationType.PresentationTypeName,
-			Status = input.PresentationStatus.PresentationStatusName,
-			PublicRepoLink = input.PublicRepoLink,
-			PrivateRepoLink = input.PrivateRepoLink,
-			Permalink = input.Permalink,
-			IsArchived = input.IsArchived,
-			IncludeInPublicProfile = input.IncludeInPublicProfile,
-			DefaultLanguageCode = input.DefaultLanguageCode,
-			Texts = input.PresentationTexts.Select(x => x.ToPresentationTextResponse()).ToList(),
-			Tags = input.PresentationTags.Select(x => x.Tag.TagName).ToList()
-		};
+	}
 
 	internal static string ToMarkdown(this Presentation presentation)
 	{

@@ -13,7 +13,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		List<PresentationType> presentationTypes = await GetWhereAsync<PresentationType>(x => x.IsEnabled == true);
 		List<PresentationStatus> presentationStatuses = await GetWhereAsync<PresentationStatus>(x => x.IsEnabled == true);
 
-		MarkdownPresentationRequest template = new()
+		PresentationRequest template = new()
 		{
 			PresentationType = $"Required -  The type of presentation [{string.Join(", ", presentationTypes.Select(x => x.PresentationTypeName))}]",
 			PresentationStatus = $"Required - The status of the presentation [{string.Join(", ", presentationStatuses.Select(x => x.PresentationStatusName))}]",
@@ -36,13 +36,13 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		if (outputFormat == InputOutputFormat.Json)
 			return SerializeAndSaveFile(path, template);
 		else if (outputFormat == InputOutputFormat.Markdown)
-			return SaveFile<MarkdownPresentationRequest>(path, template.ToMarkdown());
+			return SaveFile<PresentationRequest>(path, template.ToMarkdown());
 		else
 			return "[red] Unsupported output format.[/]";
 
 	}
 
-	public static async Task<MarkdownPresentationRequest> BuildPresentationRequestFromMarkdownAsync(string inputPath)
+	public static async Task<PresentationRequest> BuildPresentationRequestFromMarkdownAsync(string inputPath)
 	{
 
 		List<string> markdownLines = [.. (await File.ReadAllLinesAsync(inputPath))];
@@ -52,7 +52,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		StringBuilder abstractText = new();
 		StringBuilder resources = new();
 		StringBuilder additionalDetails = new();
-		MarkdownPresentationRequest presentationRequest = new();
+		PresentationRequest presentationRequest = new();
 
 		string? currentField = null;
 		foreach (string markdownLine in markdownLines)
@@ -108,10 +108,10 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		return presentationRequest;
 	}
 
-	public MarkdownPresentationRequest? BuildPresentationRequestFromJson(string inputPath)
-		=> JsonSerializer.Deserialize<MarkdownPresentationRequest>(File.ReadAllText(inputPath), _jsonSerializerOptions);
+	public PresentationRequest? BuildPresentationRequestFromJson(string inputPath)
+		=> JsonSerializer.Deserialize<PresentationRequest>(File.ReadAllText(inputPath), _jsonSerializerOptions);
 
-	public static string GetPermalink(MarkdownPresentationRequest markdownPresentationRequest)
+	public static string GetPermalink(PresentationRequest markdownPresentationRequest)
 	{
 		if (!string.IsNullOrWhiteSpace(markdownPresentationRequest.Permalink))
 		{
@@ -126,7 +126,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 	}
 
 	public async Task<string> AddPresentation(
-		MarkdownPresentationRequest presentationRequest,
+		PresentationRequest presentationRequest,
 		InputOutputFormat inputFormat,
 		string? outputPath,
 		InputOutputFormat? outputFormat)
@@ -230,7 +230,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 
 	}
 
-	private async Task<List<PresentationTag>> GetNewPresentationTagsAsync(MarkdownPresentationRequest presentationRequest)
+	private async Task<List<PresentationTag>> GetNewPresentationTagsAsync(PresentationRequest presentationRequest)
 	{
 		List<PresentationTag> presentationTags = [];
 		List<Tag> tags = await GetAllAsync<Tag>();
@@ -246,7 +246,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		return presentationTags;
 	}
 
-	private static List<PresentationText> GetNewPresentationTexts(MarkdownPresentationRequest presentationRequest)
+	private static List<PresentationText> GetNewPresentationTexts(PresentationRequest presentationRequest)
 	{
 		PresentationText presentationText = new()
 		{
@@ -268,7 +268,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		}
 		return [presentationText];
 	}
-	private async Task ValidateRequestAsync(MarkdownPresentationRequest presentationRequest)
+	private async Task ValidateRequestAsync(PresentationRequest presentationRequest)
 	{
 
 		ArgumentException.ThrowIfNullOrWhiteSpace(presentationRequest.PresentationType, nameof(presentationRequest.PresentationType));
@@ -319,7 +319,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 	private static string GetListItemValue(string markdownLine)
 	=> markdownLine.StartsWith("- ") ? markdownLine[2..] : markdownLine;
 
-	private static void ParsePresentationAttributes(string markdownLine, MarkdownPresentationRequest presentation)
+	private static void ParsePresentationAttributes(string markdownLine, PresentationRequest presentation)
 	{
 		string[] tableRow = markdownLine.Split("|");
 

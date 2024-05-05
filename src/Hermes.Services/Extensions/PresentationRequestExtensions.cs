@@ -6,7 +6,7 @@ namespace Hermes.Extensions;
 internal static class PresentationRequestExtensions
 {
 
-	internal static string ToMarkdown(this MarkdownPresentationRequest presentationRequest)
+	internal static string ToMarkdown(this PresentationRequest presentationRequest)
 	{
 		StringBuilder response = new();
 		response.AppendLine($"## {MarkdownPresentationHeadings.PresentationAttributes}");
