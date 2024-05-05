@@ -70,12 +70,12 @@
     <Build Include="tables\PresentationTag.sql" />
     <Build Include="tables\PresentationText.sql" />
     <Build Include="tables\LearningObjective.sql" />
-    <Build Include="CallForSpeakerStatus.sql" />
     <Build Include="Tables\WorldRegion.sql" />
     <Build Include="Tables\Country.sql" />
     <Build Include="Tables\CountryDivision.sql" />
     <Build Include="Tables\TimeZone.sql" />
     <Build Include="Tables\CallForSpeaker.sql" />
+    <Build Include="Tables\CallForSpeakerStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Populate\Populate_Language.sql" />

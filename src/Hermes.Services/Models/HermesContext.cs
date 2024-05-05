@@ -58,7 +58,6 @@ public partial class HermesContext : DbContext
             entity.Property(e => e.CallForSpeakerStartDate).HasComment("The start date of the call for speaker.");
             entity.Property(e => e.CallForSpeakerStatusId).HasComment("The identifier of the call for speaker status.");
             entity.Property(e => e.CallForSpeakerUrl)
-                .IsRequired()
                 .HasMaxLength(200)
                 .HasComment("The URL of the call for speaker.");
             entity.Property(e => e.EventCity)
@@ -99,6 +98,10 @@ public partial class HermesContext : DbContext
             entity.Property(e => e.EventUrl)
                 .HasMaxLength(200)
                 .HasComment("The URL of the event.");
+            entity.Property(e => e.Permalink)
+                .IsRequired()
+                .HasMaxLength(200)
+                .IsUnicode(false);
             entity.Property(e => e.SpeakerHonorarium).HasComment("Indicates if the speaker will receive a honorarium.");
             entity.Property(e => e.SpeakerHonorariumAmount)
                 .HasComment("The amount of the honorarium.")

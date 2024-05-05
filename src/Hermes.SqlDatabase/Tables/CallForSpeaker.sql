@@ -1,6 +1,7 @@
 ﻿CREATE TABLE dbo.CallForSpeaker
 (
   CallForSpeakerId            INT           NOT NULL IDENTITY(1,1),
+  Permalink                   VARCHAR(200)  NOT NULL,
   CallForSpeakerStatusId      INT           NOT NULL,
   EventName                   NVARCHAR(200) NOT NULL,
   EventUrl                    NVARCHAR(200)     NULL,
@@ -11,9 +12,9 @@
   EventCountryCode            CHAR(2)       NOT NULL,
   EventCountryDivisionCode    CHAR(3)           NULL,
   EventTimeZoneId             VARCHAR(100)      NULL,
-  CallForSpeakerUrl           NVARCHAR(200) NOT NULL,
-  CallForSpeakerStartDate     DATE          NOT NULL,
-  CallForSpeakerEndDate       DATE          NOT NULL,
+  CallForSpeakerUrl           NVARCHAR(200)     NULL,
+  CallForSpeakerStartDate     DATE              NULL,
+  CallForSpeakerEndDate       DATE              NULL,
   SpeakerHonorarium           BIT           NOT NULL CONSTRAINT dfCallForSpeaker_SpeakerHonorarium DEFAULT 0,
   SpeakerHonorariumAmount     DECIMAL(10,2)     NULL,
   SpeakerHonorariumCurrency   CHAR(3)           NULL,

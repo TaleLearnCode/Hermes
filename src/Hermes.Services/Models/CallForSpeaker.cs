@@ -12,6 +12,8 @@ public partial class CallForSpeaker
     /// </summary>
     public int CallForSpeakerId { get; set; }
 
+    public string Permalink { get; set; }
+
     /// <summary>
     /// The identifier of the call for speaker status.
     /// </summary>
@@ -70,12 +72,12 @@ public partial class CallForSpeaker
     /// <summary>
     /// The start date of the call for speaker.
     /// </summary>
-    public DateOnly CallForSpeakerStartDate { get; set; }
+    public DateOnly? CallForSpeakerStartDate { get; set; }
 
     /// <summary>
     /// The end date of the call for speaker.
     /// </summary>
-    public DateOnly CallForSpeakerEndDate { get; set; }
+    public DateOnly? CallForSpeakerEndDate { get; set; }
 
     /// <summary>
     /// Indicates if the speaker will receive a honorarium.
