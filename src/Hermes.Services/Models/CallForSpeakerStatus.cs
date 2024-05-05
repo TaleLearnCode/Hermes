@@ -29,4 +29,6 @@ public partial class CallForSpeakerStatus
     /// Indicates whether the call for speakers status is enabled.
     /// </summary>
     public bool IsEnabled { get; set; }
+
+    public virtual ICollection<CallForSpeaker> CallForSpeakers { get; set; } = new List<CallForSpeaker>();
 }

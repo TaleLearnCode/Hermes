@@ -13,7 +13,13 @@ public partial class HermesContext : DbContext
     {
     }
 
+    public virtual DbSet<CallForSpeaker> CallForSpeakers { get; set; }
+
     public virtual DbSet<CallForSpeakerStatus> CallForSpeakerStatuses { get; set; }
+
+    public virtual DbSet<Country> Countries { get; set; }
+
+    public virtual DbSet<CountryDivision> CountryDivisions { get; set; }
 
     public virtual DbSet<Language> Languages { get; set; }
 
@@ -31,8 +37,105 @@ public partial class HermesContext : DbContext
 
     public virtual DbSet<Tag> Tags { get; set; }
 
+    public virtual DbSet<TimeZone> TimeZones { get; set; }
+
+    public virtual DbSet<WorldRegion> WorldRegions { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<CallForSpeaker>(entity =>
+        {
+            entity.HasKey(e => e.CallForSpeakerId).HasName("pkcCallForSpeaker");
+
+            entity.ToTable("CallForSpeaker");
+
+            entity.Property(e => e.CallForSpeakerId).HasComment("The identifier of the call for speaker.");
+            entity.Property(e => e.AccomodationExpensesCovered).HasComment("Indicates if the event will cover the accomodation expenses of the speaker.");
+            entity.Property(e => e.AccomodationNotes)
+                .HasMaxLength(200)
+                .HasComment("Additional notes about the accomodation expenses.");
+            entity.Property(e => e.CallForSpeakerEndDate).HasComment("The end date of the call for speaker.");
+            entity.Property(e => e.CallForSpeakerStartDate).HasComment("The start date of the call for speaker.");
+            entity.Property(e => e.CallForSpeakerStatusId).HasComment("The identifier of the call for speaker status.");
+            entity.Property(e => e.CallForSpeakerUrl)
+                .IsRequired()
+                .HasMaxLength(200)
+                .HasComment("The URL of the call for speaker.");
+            entity.Property(e => e.EventCity)
+                .IsRequired()
+                .HasMaxLength(100)
+                .HasComment("The city where the event is located.");
+            entity.Property(e => e.EventCountryCode)
+                .IsRequired()
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("The ISO 3166-1 alpha-2 country code where the event is located.");
+            entity.Property(e => e.EventCountryDivisionCode)
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("The ISO 3166-2 alpha-3 country division code where the event is located.");
+            entity.Property(e => e.EventEndDate).HasComment("The end date of the event.");
+            entity.Property(e => e.EventFeeCovered)
+                .HasDefaultValue(true)
+                .HasComment("Indicates if the event will cover the fee of the speaker.");
+            entity.Property(e => e.EventFeeNotes)
+                .HasMaxLength(200)
+                .HasComment("Additional notes about the event fee.");
+            entity.Property(e => e.EventLocation)
+                .IsRequired()
+                .HasMaxLength(300)
+                .HasComment("The location of the event.");
+            entity.Property(e => e.EventName)
+                .IsRequired()
+                .HasMaxLength(200)
+                .HasComment("The name of the event.");
+            entity.Property(e => e.EventStartDate).HasComment("The start date of the event.");
+            entity.Property(e => e.EventTimeZoneId)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasComment("The identifier of the time zone where the event is located.");
+            entity.Property(e => e.EventUrl)
+                .HasMaxLength(200)
+                .HasComment("The URL of the event.");
+            entity.Property(e => e.SpeakerHonorarium).HasComment("Indicates if the speaker will receive a honorarium.");
+            entity.Property(e => e.SpeakerHonorariumAmount)
+                .HasComment("The amount of the honorarium.")
+                .HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.SpeakerHonorariumCurrency)
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("The currency of the honorarium.");
+            entity.Property(e => e.SpeakerHonorariumNotes)
+                .HasMaxLength(200)
+                .HasComment("Additional notes about the honorarium.");
+            entity.Property(e => e.SubmissionLimit).HasComment("The maximum number of submissions allowed.");
+            entity.Property(e => e.TravelExpensesCovered).HasComment("Indicates if the event will cover the travel expenses of the speaker.");
+            entity.Property(e => e.TravelNotes)
+                .HasMaxLength(200)
+                .HasComment("Additional notes about the travel expenses.");
+
+            entity.HasOne(d => d.CallForSpeakerStatus).WithMany(p => p.CallForSpeakers)
+                .HasForeignKey(d => d.CallForSpeakerStatusId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkCallForSpeaker_CallForSpeakerStatus");
+
+            entity.HasOne(d => d.EventCountryCodeNavigation).WithMany(p => p.CallForSpeakers)
+                .HasForeignKey(d => d.EventCountryCode)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkCallForSpeaker_Country");
+
+            entity.HasOne(d => d.EventTimeZone).WithMany(p => p.CallForSpeakers)
+                .HasForeignKey(d => d.EventTimeZoneId)
+                .HasConstraintName("fkCallForSpeaker_TimeZone");
+
+            entity.HasOne(d => d.CountryDivision).WithMany(p => p.CallForSpeakers)
+                .HasForeignKey(d => new { d.EventCountryCode, d.EventCountryDivisionCode })
+                .HasConstraintName("fkCallForSpeaker_CountryDivision");
+        });
+
         modelBuilder.Entity<CallForSpeakerStatus>(entity =>
         {
             entity.HasKey(e => e.CallForSpeakerStatusId).HasName("pkcCallForSpeakerStatus");
@@ -48,6 +151,83 @@ public partial class HermesContext : DbContext
                 .HasComment("The name of the call for speakers status.");
             entity.Property(e => e.IsEnabled).HasComment("Indicates whether the call for speakers status is enabled.");
             entity.Property(e => e.SortOrder).HasComment("The order in which the call for speakers status should be displayed.");
+        });
+
+        modelBuilder.Entity<Country>(entity =>
+        {
+            entity.HasKey(e => e.CountryCode).HasName("pkcCountry");
+
+            entity.ToTable("Country", tb => tb.HasComment("Lookup table representing the countries as defined by the ISO 3166-1 standard."));
+
+            entity.HasIndex(e => e.WorldRegionCode, "idxCountry_WorldRegionCode");
+
+            entity.Property(e => e.CountryCode)
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("Identifier of the country using the ISO 3166-1 Alpha-2 code.");
+            entity.Property(e => e.CountryName)
+                .IsRequired()
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasComment("Name of the country using the ISO 3166-1 Country Name.");
+            entity.Property(e => e.DivisionName)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasComment("The primary name of the country's divisions.");
+            entity.Property(e => e.HasDivisions).HasComment("Flag indicating whether the country has divisions (states, provinces, etc.)");
+            entity.Property(e => e.IsEnabled).HasComment("Flag indicating whether the country record is enabled.");
+            entity.Property(e => e.M49code)
+                .IsRequired()
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("Identifier of the country using the United Nations M49 standard.")
+                .HasColumnName("M49Code");
+            entity.Property(e => e.WorldRegionCode)
+                .IsRequired()
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("Identifier of the world region where the country is located.");
+
+            entity.HasOne(d => d.WorldRegionCodeNavigation).WithMany(p => p.Countries)
+                .HasForeignKey(d => d.WorldRegionCode)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkCountry_WorldRegion");
+        });
+
+        modelBuilder.Entity<CountryDivision>(entity =>
+        {
+            entity.HasKey(e => new { e.CountryCode, e.CountryDivisionCode }).HasName("pkcCountryDivision");
+
+            entity.ToTable("CountryDivision", tb => tb.HasComment("Lookup table representing the world regions as defined by the ISO 3166-2 standard."));
+
+            entity.Property(e => e.CountryCode)
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .IsFixedLength();
+            entity.Property(e => e.CountryDivisionCode)
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("Identifier of the country division using the ISO 3166-2 Alpha-2 code.");
+            entity.Property(e => e.CategoryName)
+                .IsRequired()
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasComment("The category name of the country division.");
+            entity.Property(e => e.CountryDivisionName)
+                .IsRequired()
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasComment("Name of the country using the ISO 3166-2 Subdivision Name.");
+            entity.Property(e => e.IsEnabled).HasComment("Flag indicating whether the country division record is enabled.");
+
+            entity.HasOne(d => d.CountryCodeNavigation).WithMany(p => p.CountryDivisions)
+                .HasForeignKey(d => d.CountryCode)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkCountryDivision_Country");
         });
 
         modelBuilder.Entity<Language>(entity =>
@@ -275,6 +455,70 @@ public partial class HermesContext : DbContext
                 .IsRequired()
                 .HasMaxLength(100)
                 .HasComment("The name of the tag.");
+        });
+
+        modelBuilder.Entity<TimeZone>(entity =>
+        {
+            entity.HasKey(e => e.TimeZoneId).HasName("pkcTimeZone");
+
+            entity.ToTable("TimeZone", tb => tb.HasComment("Represents the list of time zones as defined by the IANA."));
+
+            entity.Property(e => e.TimeZoneId)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasComment("The identifier of the time zone as defined by the IANA.");
+            entity.Property(e => e.DaylightOffset)
+                .HasMaxLength(6)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("The daylight offset for the time zone.");
+            entity.Property(e => e.DaylightSavingsAbbreviation)
+                .HasMaxLength(7)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("The daylight savings abbreviation for the time zone.");
+            entity.Property(e => e.StandardAbbreviation)
+                .IsRequired()
+                .HasMaxLength(7)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("The standard abbreviation for the time zone.");
+            entity.Property(e => e.StandardOffset)
+                .IsRequired()
+                .HasMaxLength(6)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("The standard offset for the time zone.");
+        });
+
+        modelBuilder.Entity<WorldRegion>(entity =>
+        {
+            entity.HasKey(e => e.WorldRegionCode).HasName("pkcWorldRegion");
+
+            entity.ToTable("WorldRegion", tb => tb.HasComment("Lookup table representing the world regions as defined by the UN M49 specification."));
+
+            entity.HasIndex(e => e.ParentId, "idxWorldRegion_ParentId");
+
+            entity.Property(e => e.WorldRegionCode)
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("Identifier of the world region.");
+            entity.Property(e => e.IsEnabled).HasComment("Flag indicating whether the world region is enabled.");
+            entity.Property(e => e.ParentId)
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("Identifier of the world region parent (for subregions).");
+            entity.Property(e => e.WorldRegionName)
+                .IsRequired()
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasComment("Name of the world region.");
+
+            entity.HasOne(d => d.Parent).WithMany(p => p.InverseParent)
+                .HasForeignKey(d => d.ParentId)
+                .HasConstraintName("fkWorldRegion_WorldRegion");
         });
 
         OnModelCreatingPartial(modelBuilder);
