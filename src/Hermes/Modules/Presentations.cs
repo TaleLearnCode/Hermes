@@ -4,9 +4,10 @@ internal class Presentations(string databaseConnectionString)
 {
 
 	private readonly PresentationServices _presentationServices = new(databaseConnectionString);
-	private readonly PresentationTypeServices presentationTypeServices = new(databaseConnectionString);
-	private readonly PresentationStatusServices presentationStatusServices = new(databaseConnectionString);
+	private readonly PresentationTypeServices _presentationTypeServices = new(databaseConnectionString);
+	private readonly PresentationStatusServices _presentationStatusServices = new(databaseConnectionString);
 	private readonly LanguageServices _languageServices = new(databaseConnectionString);
+	private readonly FileServices _fileServices = new();
 
 	#region Command Line Argument Initialization
 
@@ -19,6 +20,7 @@ internal class Presentations(string databaseConnectionString)
 		InitializeAddCommand(presentationCommand);
 		InitializeUpdateCommand(presentationCommand);
 		InitializeRemoveCommand(presentationCommand);
+		InitializeGetStatusesCommand(presentationCommand);
 	}
 
 	private void InitializeTemplateCommand(Command presentationCommand)
@@ -73,8 +75,52 @@ internal class Presentations(string databaseConnectionString)
 		removeCommand.SetHandler(RemovePresentationAsync, permalinkOption);
 	}
 
+	private void InitializeGetStatusesCommand(Command presentationCommand)
+	{
+		Option<string> outputOption = new(["--output", "-o"], () => string.Empty, "Path to the output JSON file.");
+		Option<string> outputFormatOption = new(["--outputFormat", "-of"], () => string.Empty, "The format of the output file. Must be 'console' or 'json'.");
+
+		Command updateCommand = new("statuses", "Gets the list of presentation statuses.");
+		updateCommand.AddOption(outputOption);
+		updateCommand.AddOption(outputFormatOption);
+		presentationCommand.AddCommand(updateCommand);
+		updateCommand.SetHandler(GetPresentationStatuses, outputFormatOption, outputOption);
+
+	}
 
 	#endregion
+
+	private async Task GetPresentationStatuses(string? outputFormatOption, string? outputPath)
+	{
+
+		InputOutputFormat outputFormat = InputOutputFormat.Console;
+		if (string.IsNullOrWhiteSpace(outputFormatOption) && !string.IsNullOrWhiteSpace(outputPath))
+			if (Path.GetExtension(outputPath) == ".json")
+				outputFormat = InputOutputFormat.Json;
+			else
+				throw new ArgumentException("The output file format is not supported. Please specify 'console' or 'json'.");
+		else if (outputFormatOption?.ToLowerInvariant() == "json")
+			outputFormat = InputOutputFormat.Json;
+
+		if (outputFormat == InputOutputFormat.Json && string.IsNullOrWhiteSpace(outputPath))
+			outputPath = "presentation-statuses.json";
+
+		List<PresentationStatus> presentationStatuses = await _presentationStatusServices.GetListAsync();
+
+		if (outputFormat == InputOutputFormat.Json)
+		{
+			AnsiConsole.WriteLine(_fileServices.SerializeAndSaveFile(outputPath!, presentationStatuses));
+		}
+		else
+		{
+			var table = new Table();
+			table.AddColumn("Name");
+			table.AddColumn("Sort Order");
+			foreach (PresentationStatus presentationStatus in presentationStatuses)
+				table.AddRow(presentationStatus.PresentationStatusName, presentationStatus.SortOrder.ToString());
+			AnsiConsole.Write(table);
+		}
+	}
 
 	private async Task RemovePresentationAsync(string? permalink)
 	{
@@ -471,12 +517,12 @@ internal class Presentations(string databaseConnectionString)
 
 		PresentationType? presentationType = null;
 		if (!string.IsNullOrWhiteSpace(presentationRequest.PresentationType))
-			presentationType = await presentationTypeServices.GetByNameAsync(presentationRequest.PresentationType);
+			presentationType = await _presentationTypeServices.GetByNameAsync(presentationRequest.PresentationType);
 		presentationType ??= await GetPresentationType();
 
 		PresentationStatus? presentationStatus = null;
 		if (!string.IsNullOrWhiteSpace(presentationRequest.PresentationStatus))
-			presentationStatus = await presentationStatusServices.GetByNameAsync(presentationRequest.PresentationStatus);
+			presentationStatus = await _presentationStatusServices.GetByNameAsync(presentationRequest.PresentationStatus);
 		presentationStatus ??= await GetPresentationStatus();
 
 		Language? language = null;
@@ -487,7 +533,7 @@ internal class Presentations(string databaseConnectionString)
 
 	private async Task<PresentationType> GetPresentationType()
 	{
-		List<PresentationType> presentationTypes = await presentationTypeServices.GetListAsync();
+		List<PresentationType> presentationTypes = await _presentationTypeServices.GetListAsync();
 		string presentationTypeName = AnsiConsole.Prompt(
 			new SelectionPrompt<string>()
 				.Title("Presentation Type [green](required)[/]:")
@@ -499,7 +545,7 @@ internal class Presentations(string databaseConnectionString)
 
 	private async Task<PresentationStatus> GetPresentationStatus()
 	{
-		List<PresentationStatus> presentationStatuses = await presentationStatusServices.GetListAsync();
+		List<PresentationStatus> presentationStatuses = await _presentationStatusServices.GetListAsync();
 		string presentationStatusName = AnsiConsole.Prompt(
 			new SelectionPrompt<string>()
 				.Title("Presentation Status [green](required)[/]:")

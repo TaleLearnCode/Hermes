@@ -2,7 +2,7 @@
   "profiles": {
     "Hermes": {
       "commandName": "Project",
-      "commandLineArgs": "presentations remove --permalink architect-like-a-boss",
+      "commandLineArgs": "presentations statuses -of json",
       "workingDirectory": "C:\\Repos\\Hermes\\src\\Hermes\\bin\\Debug\\net8.0"
     }
   }
