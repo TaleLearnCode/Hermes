@@ -1,7 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
-using System.Text.Json;
-using System.Text.Json.Serialization;
+﻿using Markdig;
 
 namespace Hermes.Services;
 
@@ -131,6 +128,19 @@ public abstract class ServicesBase
 	{
 		using HermesContext context = new(_databaseConnectionString);
 		return await context.Set<T>().AnyAsync(predicate);
+	}
+
+	protected static bool IsMarkdownValid(string markdown)
+	{
+		try
+		{
+			Markdown.Parse(markdown);
+			return true;
+		}
+		catch (Exception)
+		{
+			return false;
+		}
 	}
 
 }

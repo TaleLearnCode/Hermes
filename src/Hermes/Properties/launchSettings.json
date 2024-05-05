@@ -2,7 +2,7 @@
   "profiles": {
     "Hermes": {
       "commandName": "Project",
-      "commandLineArgs": "presentations list",
+      "commandLineArgs": "presentations add -f \"markdown\" -i \"C:\\Presentations\\ArchitectLikeABoss\\readme-hermes.md\"",
       "workingDirectory": "C:\\Repos\\Hermes\\src\\Hermes\\bin\\Debug\\net8.0"
     }
   }

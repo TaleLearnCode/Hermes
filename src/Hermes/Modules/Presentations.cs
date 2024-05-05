@@ -1,5 +1,5 @@
-﻿using Hermes.Responses;
-using Hermes.Types;
+﻿using Hermes.Models;
+using Hermes.Requests;
 
 namespace Hermes.Modules;
 
@@ -7,6 +7,9 @@ internal class Presentations(string databaseConnectionString)
 {
 
 	private readonly PresentationServices _presentationServices = new(databaseConnectionString);
+	private readonly PresentationTypeServices presentationTypeServices = new(databaseConnectionString);
+	private readonly PresentationStatusServices presentationStatusServices = new(databaseConnectionString);
+	private readonly LanguageServices _languageServices = new(databaseConnectionString);
 
 	#region Command Line Argument Initialization
 
@@ -17,7 +20,6 @@ internal class Presentations(string databaseConnectionString)
 
 		InitializeTemplateCommand(presentationCommand);
 		InitializeAddCommand(presentationCommand);
-		InitializeListCommand(presentationCommand);
 	}
 
 	private void InitializeTemplateCommand(Command presentationCommand)
@@ -33,31 +35,19 @@ internal class Presentations(string databaseConnectionString)
 	{
 		Option<string> inputOption = new(["--input", "-i"], () => string.Empty, "Path to the input JSON file.");
 		Option<string> outputOption = new(["--output", "-o"], () => StaticValues.NoEntryDefault, "Path to the output JSON file.");
+		//Option<string> outputOption = new(["--output", "-o"], "Path to the output JSON file.");
+		Option<string> formatOption = new(["--format", "-f"], "The format of the input file. Must be 'markdown' or 'json'.");
 		Command addCommand = new("add", "Adds a presentation to the database.");
 		addCommand.AddOption(inputOption);
 		addCommand.AddOption(outputOption);
+		addCommand.AddOption(formatOption);
 		presentationCommand.AddCommand(addCommand);
-		addCommand.SetHandler(AddPresentationAsync, inputOption, outputOption);
-	}
-
-	private void InitializeListCommand(Command presentationCommand)
-	{
-		Option<string> formatOption = new(["--format", "-f"], () => "console", "Output format (console or json).");
-		Option<string> outputOption = new(["--output", "-o"], () => StaticValues.NoEntryDefault, "Path to the output JSON file.");
-		Option<string> statusOption = new(["--status", "-s"], () => StaticValues.NoEntryDefault, "Status of the presentation.");
-		Option<string> typeOption = new(["--type", "-t"], () => StaticValues.NoEntryDefault, "Type of the presentation.");
-		Command listCommand = new("list", "Lists presentations in the database.");
-		listCommand.AddOption(formatOption);
-		listCommand.AddOption(outputOption);
-		listCommand.AddOption(statusOption);
-		listCommand.AddOption(typeOption);
-		presentationCommand.AddCommand(listCommand);
-		listCommand.SetHandler(GetPresentationListAsync, formatOption, outputOption, statusOption, typeOption);
+		addCommand.SetHandler(AddPresentationAsync, inputOption, outputOption, formatOption);
 	}
 
 	#endregion
 
-	internal async Task GetTemplateAsync(string output)
+	private async Task GetTemplateAsync(string output)
 	{
 		if (File.Exists(output) && !AnsiConsole.Confirm("The specified output path exists; do you want to overwrite?"))
 			return;
@@ -72,7 +62,47 @@ internal class Presentations(string databaseConnectionString)
 		Console.WriteLine(status);
 	}
 
-	internal async Task AddPresentationAsync(string inputPath, string? outputPath)
+	//private async Task AddPresentationAsync(string inputPath, string? outputPath)
+	//{
+	//	try
+	//	{
+	//		if (!File.Exists(inputPath))
+	//		{
+	//			AnsiConsole.MarkupLine($"[red]The specified input file [/][bold red]'{inputPath}'[/][red] does not exist.[/]");
+	//			return;
+	//		}
+	//		if (string.IsNullOrWhiteSpace(outputPath)) outputPath = null;
+	//		if (!string.IsNullOrWhiteSpace(outputPath)
+	//			&& File.Exists(outputPath)
+	//			&& !AnsiConsole.Confirm("The specified output path exists; do you want to overwrite?"))
+	//			return;
+	//		string status = string.Empty;
+	//		await AnsiConsole.Status()
+	//			.Spinner(Spinner.Known.Dots8Bit)
+	//			.SpinnerStyle(Style.Parse("green bold"))
+	//			.StartAsync("Adding presentation...", async ctx =>
+	//			{
+	//				status = await _presentationServices.AddPresentationFromJsonAsync(inputPath, outputPath);
+	//			});
+	//		Console.WriteLine(status);
+	//	}
+	//	catch (ArgumentException ex)
+	//	{
+	//		AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
+	//	}
+	//	catch (Exception ex)
+	//	{
+	//		AnsiConsole.WriteException(ex,
+	//			ExceptionFormats.ShortenPaths
+	//			| ExceptionFormats.ShortenTypes
+	//			| ExceptionFormats.ShortenMethods
+	//			| ExceptionFormats.ShortenEverything
+	//			| ExceptionFormats.NoStackTrace);
+	//	}
+
+	//}
+
+	private async Task AddPresentationAsync(string inputPath, string? outputPath, string format)
 	{
 		try
 		{
@@ -87,14 +117,28 @@ internal class Presentations(string databaseConnectionString)
 				&& !AnsiConsole.Confirm("The specified output path exists; do you want to overwrite?"))
 				return;
 			string status = string.Empty;
-			await AnsiConsole.Status()
-				.Spinner(Spinner.Known.Dots8Bit)
-				.SpinnerStyle(Style.Parse("green bold"))
-				.StartAsync("Adding presentation...", async ctx =>
-				{
-					status = await _presentationServices.AddPresentationAsync(inputPath, outputPath);
-				});
-			Console.WriteLine(status);
+			//await AnsiConsole.Status()
+			//	.Spinner(Spinner.Known.Dots8Bit)
+			//	.SpinnerStyle(Style.Parse("green bold"))
+			//	.StartAsync("Adding presentation...", async ctx =>
+			//	{
+			//		status = await _presentationServices.AddPresentationFromJsonAsync(inputPath, outputPath);
+			//	});
+			//Console.WriteLine(status);
+
+
+			status = format switch
+			{
+				"markdown" => await AddPresentationFromMarkdown(inputPath, outputPath),
+				"json" => await AddPresentationFromJson(inputPath, outputPath),
+				_ => "[red]Invalid format. Please specify 'markdown' or 'json'.[/]",
+			};
+			AnsiConsole.Markup(status);
+
+
+
+
+
 		}
 		catch (ArgumentException ex)
 		{
@@ -112,82 +156,110 @@ internal class Presentations(string databaseConnectionString)
 
 	}
 
-	internal async Task GetPresentationListAsync(
-		string format,
-		string outputPath,
-		string? status,
-		string? type)
+	private async Task<string> AddPresentationFromJson(string inputPath, string? outputPath)
 	{
+		string status = string.Empty;
+		await AnsiConsole.Status()
+			.Spinner(Spinner.Known.Dots8Bit)
+			.SpinnerStyle(Style.Parse("green bold"))
+			.StartAsync("Adding presentation...", async ctx =>
+			{
+				status = await _presentationServices.AddPresentationFromJsonAsync(inputPath, outputPath);
+			});
+		return status;
+	}
 
-		if (!Enum.TryParse(format, true, out OutputFormat outputFormat))
-		{
-			AnsiConsole.MarkupLine($"[red]Invalid output format '{format}'.[/]");
-			return;
-		}
+	private async Task<string> AddPresentationFromMarkdown(string inputPath, string? outputPath)
+	{
+		//MarkdownPresentationRequest request = new()
+		//{
+		//	LanguageCode = AnsiConsole.Ask<string>("Language Code: "),
+		//	PublicRepoLink = AnsiConsole.Prompt(new TextPrompt<string>("Public Repo Link: ").AllowEmpty()),
+		//	PrivateRepoLink = AnsiConsole.Prompt(new TextPrompt<string>("Private Repo Link: ").AllowEmpty()),
+		//	Status = AnsiConsole.Ask<string>("Status: "),
+		//	IsArchived = AnsiConsole.Confirm("Not Archived: "),
+		//	IncludeInPublicProfile = AnsiConsole.Confirm("Include in Public Profile: ")
+		//};
+		//string status = string.Empty;
+		//await AnsiConsole.Status()
+		//	.Spinner(Spinner.Known.Dots8Bit)
+		//	.SpinnerStyle(Style.Parse("green bold"))
+		//	.StartAsync("Adding presentation...", async ctx =>
+		//	{
+		//		status = await _presentationServices.AddPresentationFromMarkdownAsync(inputPath, outputPath, request);
+		//	});
+		//return status;
 
-		if (string.IsNullOrWhiteSpace(outputPath))
-			outputPath = "presentations.json";
+		MarkdownPresentationRequest presentationRequest = await _presentationServices.BuildPresentationRequestFromMarkdownAsync(inputPath);
+		if (presentationRequest is null)
+			return "[red]The specified input file is not a valid Markdown presentation file.[/]";
 
-		if (outputPath != StaticValues.NoEntryDefault
-			&& File.Exists(outputPath)
-			&& !AnsiConsole.Confirm("The specified output path exists; do you want to overwrite?"))
-			return;
+		if (string.IsNullOrEmpty(presentationRequest.Title))
+			presentationRequest.Title = AnsiConsole.Ask<string>("Title: ");
+		if (string.IsNullOrEmpty(presentationRequest.Permalink))
+			presentationRequest.Permalink = _presentationServices.GetPermalink(presentationRequest);
 
-		if (status == StaticValues.NoEntryDefault) status = null;
-		if (type == StaticValues.NoEntryDefault) type = null;
+		PresentationType? presentationType = null;
+		if (!string.IsNullOrWhiteSpace(presentationRequest.PresentationType))
+			presentationType = await presentationTypeServices.GetByNameAsync(presentationRequest.PresentationType);
+		presentationType ??= await GetPresentationType();
 
-		try
-		{
-			List<PresentationItemResponse> presentations = [];
-			await AnsiConsole.Status()
-				.Spinner(Spinner.Known.Dots8Bit)
-				.SpinnerStyle(Style.Parse("green bold"))
-				.StartAsync("Generating presentation list...", async ctx =>
-				{
-					presentations = await _presentationServices.GetPresentationListAsync(outputFormat, outputPath, type, status);
-				});
-			if (outputFormat == OutputFormat.Console)
-				DisplayPresentationList(presentations);
-			else
-				AnsiConsole.MarkupLine($"[green]Presentation list saved to '{outputPath}'.[/]");
-		}
-		catch (ArgumentException ex)
-		{
-			AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
-		}
-		catch (Exception ex)
-		{
-			AnsiConsole.WriteException(ex,
-				ExceptionFormats.ShortenPaths
-				| ExceptionFormats.ShortenTypes
-				| ExceptionFormats.ShortenMethods
-				| ExceptionFormats.ShortenEverything
-				| ExceptionFormats.NoStackTrace);
-		}
+		PresentationStatus? presentationStatus = null;
+		if (!string.IsNullOrWhiteSpace(presentationRequest.PresentationStatus))
+			presentationStatus = await presentationStatusServices.GetByNameAsync(presentationRequest.PresentationStatus);
+		presentationStatus ??= await GetPresentationStatus();
+
+		Language? language = null;
+		if (!string.IsNullOrWhiteSpace(presentationRequest.DefaultLanguageCode))
+			language = await _languageServices.GetByCodeAsync(presentationRequest.DefaultLanguageCode);
+		language ??= await GetLanguage();
+
+		string status = string.Empty;
+		await AnsiConsole.Status()
+			.Spinner(Spinner.Known.Dots8Bit)
+			.SpinnerStyle(Style.Parse("green bold"))
+			.StartAsync("Adding presentation...", async ctx =>
+			{
+				status = await _presentationServices.AddPresentation(presentationRequest, outputPath);
+			});
+		return status;
 
 	}
 
-	private static void DisplayPresentationList(List<PresentationItemResponse> presentations)
+	private async Task<PresentationType> GetPresentationType()
 	{
+		List<PresentationType> presentationTypes = await presentationTypeServices.GetListAsync();
+		string presentationTypeName = AnsiConsole.Prompt(
+			new SelectionPrompt<string>()
+				.Title("Presentation Type [green](required)[/]:")
+				.PageSize(10)
+				.MoreChoicesText("More presentation types")
+				.AddChoices(presentationTypes.Select(x => x.PresentationTypeName).ToArray()));
+		return presentationTypes.First(x => x.PresentationTypeName == presentationTypeName);
+	}
 
-		Table table = new();
+	private async Task<PresentationStatus> GetPresentationStatus()
+	{
+		List<PresentationStatus> presentationStatuses = await presentationStatusServices.GetListAsync();
+		string presentationStatusName = AnsiConsole.Prompt(
+			new SelectionPrompt<string>()
+				.Title("Presentation Status [green](required)[/]:")
+				.PageSize(10)
+				.MoreChoicesText("More presentation statuses")
+				.AddChoices(presentationStatuses.Select(x => x.PresentationStatusName).ToArray()));
+		return presentationStatuses.First(x => x.PresentationStatusName == presentationStatusName);
+	}
 
-		table.AddColumn("Permalink");
-		table.AddColumn("Type");
-		table.AddColumn("Status");
-		table.AddColumn("Include In Public Profile");
-
-		foreach (PresentationItemResponse presentation in presentations)
-		{
-			table.AddRow(
-				presentation.Permalink,
-				presentation.Type,
-				presentation.Status,
-				presentation.IncludeInPublicProfile.ToString());
-		}
-
-		AnsiConsole.Write(table);
-
+	private async Task<Language> GetLanguage()
+	{
+		List<Language> languages = await _languageServices.GetListAsync();
+		string languageCode = AnsiConsole.Prompt(
+			new SelectionPrompt<string>()
+				.Title("Language Code [green](required)[/]:")
+				.PageSize(10)
+				.MoreChoicesText("More languages")
+				.AddChoices(languages.Select(x => x.LanguageCode).ToArray()));
+		return languages.First(x => x.LanguageCode == languageCode);
 	}
 
 }
