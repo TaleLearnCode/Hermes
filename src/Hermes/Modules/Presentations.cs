@@ -21,6 +21,7 @@ internal class Presentations(string databaseConnectionString)
 		InitializeUpdateCommand(presentationCommand);
 		InitializeRemoveCommand(presentationCommand);
 		InitializeGetStatusesCommand(presentationCommand);
+		InitializeGetTypesCommand(presentationCommand);
 	}
 
 	private void InitializeTemplateCommand(Command presentationCommand)
@@ -88,6 +89,19 @@ internal class Presentations(string databaseConnectionString)
 
 	}
 
+	private void InitializeGetTypesCommand(Command presentationCommand)
+	{
+		Option<string> outputOption = new(["--output", "-o"], () => string.Empty, "Path to the output JSON file.");
+		Option<string> outputFormatOption = new(["--outputFormat", "-of"], () => string.Empty, "The format of the output file. Must be 'console' or 'json'.");
+
+		Command updateCommand = new("types", "Gets the list of presentation types.");
+		updateCommand.AddOption(outputOption);
+		updateCommand.AddOption(outputFormatOption);
+		presentationCommand.AddCommand(updateCommand);
+		updateCommand.SetHandler(GetPresentationStatuses, outputFormatOption, outputOption);
+
+	}
+
 	#endregion
 
 	private async Task GetPresentationStatuses(string? outputFormatOption, string? outputPath)
@@ -118,6 +132,38 @@ internal class Presentations(string databaseConnectionString)
 			table.AddColumn("Sort Order");
 			foreach (PresentationStatus presentationStatus in presentationStatuses)
 				table.AddRow(presentationStatus.PresentationStatusName, presentationStatus.SortOrder.ToString());
+			AnsiConsole.Write(table);
+		}
+	}
+
+	private async Task GetPresentationTypes(string? outputFormatOption, string? outputPath)
+	{
+
+		InputOutputFormat outputFormat = InputOutputFormat.Console;
+		if (string.IsNullOrWhiteSpace(outputFormatOption) && !string.IsNullOrWhiteSpace(outputPath))
+			if (Path.GetExtension(outputPath) == ".json")
+				outputFormat = InputOutputFormat.Json;
+			else
+				throw new ArgumentException("The output file format is not supported. Please specify 'console' or 'json'.");
+		else if (outputFormatOption?.ToLowerInvariant() == "json")
+			outputFormat = InputOutputFormat.Json;
+
+		if (outputFormat == InputOutputFormat.Json && string.IsNullOrWhiteSpace(outputPath))
+			outputPath = "presentation-types.json";
+
+		List<PresentationType> presentationTypes = await _presentationTypeServices.GetListAsync();
+
+		if (outputFormat == InputOutputFormat.Json)
+		{
+			AnsiConsole.WriteLine(_fileServices.SerializeAndSaveFile(outputPath!, presentationTypes));
+		}
+		else
+		{
+			var table = new Table();
+			table.AddColumn("Name");
+			table.AddColumn("Sort Order");
+			foreach (PresentationType presentationType in presentationTypes)
+				table.AddRow(presentationType.PresentationTypeName, presentationType.SortOrder.ToString());
 			AnsiConsole.Write(table);
 		}
 	}
