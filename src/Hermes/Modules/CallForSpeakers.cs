@@ -1,6 +1,6 @@
 ﻿namespace Hermes.Modules;
 
-internal class CallForSpeakers(string databaseConnectionString)
+internal class CallForSpeakers(string databaseConnectionString) : ModuleBase
 {
 
 	private readonly CallForSpeakerServices _callForSpeakerServices = new(databaseConnectionString);
@@ -12,6 +12,7 @@ internal class CallForSpeakers(string databaseConnectionString)
 		rootCommand.AddCommand(presentationCommand);
 
 		InitializeStatuses(presentationCommand);
+		InitializeTemplate(presentationCommand);
 	}
 
 	#region Get Statuses
@@ -59,6 +60,30 @@ internal class CallForSpeakers(string databaseConnectionString)
 				table.AddRow(status.CallForSpeakerStatusName, status.SortOrder.ToString());
 			AnsiConsole.Write(table);
 		}
+	}
+
+	#endregion
+
+	#region Get Template
+
+	private void InitializeTemplate(Command presentationCommand)
+	{
+		Option<string> outputOption = new(["--output", "-o"], () => string.Empty, "Path to the output file.");
+		Option<string> outputFormatOption = new(["--outputFormat", "-of"], () => string.Empty, "The format of the output file. Must be 'markdown' or 'json'.");
+
+		Command updateCommand = new("template", "Gets the template for a call for speakers.");
+		updateCommand.AddOption(outputOption);
+		updateCommand.AddOption(outputFormatOption);
+		presentationCommand.AddCommand(updateCommand);
+		updateCommand.SetHandler(GetTemplate, outputFormatOption, outputOption);
+	}
+
+	private void GetTemplate(string outputPath, string? outputFormatOption)
+	{
+		InputOutputFormat outputFormat = DetermineOutputFormat(outputFormatOption, InputOutputFormat.Markdown, outputPath);
+		outputPath = DetermineOutputPath(outputPath, outputFormat, "callforspeakers-template");
+		if (!VerifyIfOverwrite(outputPath)) return;
+		AnsiConsole.WriteLine(_callForSpeakerServices.GetTemplate(outputFormat, outputPath));
 	}
 
 	#endregion

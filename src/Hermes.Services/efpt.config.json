@@ -16,7 +16,19 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "[dbo].[CallForSpeaker]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[CallForSpeakerStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Country]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[CountryDivision]",
          "ObjectType": 0
       },
       {
@@ -49,6 +61,14 @@
       },
       {
          "Name": "[dbo].[Tag]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[TimeZone]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[WorldRegion]",
          "ObjectType": 0
       }
    ],

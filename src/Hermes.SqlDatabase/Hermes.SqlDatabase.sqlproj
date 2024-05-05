@@ -70,7 +70,12 @@
     <Build Include="tables\PresentationTag.sql" />
     <Build Include="tables\PresentationText.sql" />
     <Build Include="tables\LearningObjective.sql" />
-    <Build Include="CallForSpeakerStatus.sql" />
+    <Build Include="Tables\WorldRegion.sql" />
+    <Build Include="Tables\Country.sql" />
+    <Build Include="Tables\CountryDivision.sql" />
+    <Build Include="Tables\TimeZone.sql" />
+    <Build Include="Tables\CallForSpeaker.sql" />
+    <Build Include="Tables\CallForSpeakerStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Populate\Populate_Language.sql" />
@@ -78,6 +83,10 @@
     <None Include="Scripts\Populate\Populate_PresentationType.sql" />
     <None Include="Hermes.SqlDatabase.publish.xml" />
     <None Include="Scripts\Populate\Populate_CallForSpeakerStatus.sql" />
+    <None Include="Scripts\Populate\Populate_Country.sql" />
+    <None Include="Scripts\Populate\Populate_CountryDivision.sql" />
+    <None Include="Scripts\Populate\Populate_WorldRegion.sql" />
+    <None Include="Scripts\Populate\Populate_TimeZone.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\Script.PostDeployment.sql" />
