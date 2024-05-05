@@ -270,7 +270,19 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		});
 
 		if (outputPath != StaticValues.NoEntryDefault)
+		{
+			using HermesContext context = new(_databaseConnectionString);
+			presentation = await context.Presentations
+				.Include(x => x.PresentationType)
+				.Include(x => x.PresentationStatus)
+				.Include(x => x.PresentationTexts)
+					.ThenInclude(x => x.LearningObjectives)
+				.Include(x => x.PresentationTags)
+					.ThenInclude(x => x.Tag)
+				.FirstAsync(x => x.PresentationId == presentation.PresentationId);
 			SerializeAndSaveFile(outputPath ?? $"{presentation.Permalink}.json", presentation.ToPresentationResponse());
+
+		}
 
 		return $"The presentation '{presentation.Permalink}' was successfully added to the database.";
 	}
