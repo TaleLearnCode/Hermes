@@ -18,6 +18,7 @@ internal class Presentations(string databaseConnectionString)
 		InitializeTemplateCommand(presentationCommand);
 		InitializeAddCommand(presentationCommand);
 		InitializeUpdateCommand(presentationCommand);
+		InitializeRemoveCommand(presentationCommand);
 	}
 
 	private void InitializeTemplateCommand(Command presentationCommand)
@@ -62,7 +63,26 @@ internal class Presentations(string databaseConnectionString)
 		presentationCommand.AddCommand(updateCommand);
 		updateCommand.SetHandler(UpdatePresentationAsync, inputOption, inputFormatOption, outputOption, outputFormatOption);
 	}
+
+	private void InitializeRemoveCommand(Command presentationCommand)
+	{
+		Option<string> permalinkOption = new(["--permalink", "-p"], "The permalink of the presentation to remove.");
+		Command removeCommand = new("remove", "Removes a presentation from the database.");
+		removeCommand.AddOption(permalinkOption);
+		presentationCommand.AddCommand(removeCommand);
+		removeCommand.SetHandler(RemovePresentationAsync, permalinkOption);
+	}
+
+
 	#endregion
+
+	private async Task RemovePresentationAsync(string? permalink)
+	{
+		if (string.IsNullOrWhiteSpace(permalink))
+			permalink = AnsiConsole.Ask<string>("Permalink: ");
+		if (AnsiConsole.Confirm($"Are you sure you want to delete the [bold green]'{permalink}'[/] presentation?"))
+			AnsiConsole.WriteLine(await _presentationServices.RemovePresentationAsync(permalink));
+	}
 
 	private async Task GetTemplateAsync(string outputPath, string? outputFormatOption)
 	{

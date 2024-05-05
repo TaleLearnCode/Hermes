@@ -171,6 +171,34 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		return $"The presentation '{presentation.Permalink}' was successfully updated in the database.";
 	}
 
+	public async Task<string> RemovePresentationAsync(string permalink)
+	{
+
+		Presentation? presentation = await GetPresentationAsync(permalink);
+		if (presentation is null) return $"The presentation with the permalink '{permalink}' was not found in the database.";
+
+		for (int i = presentation.PresentationTexts.Count; i > 0; i--)
+		{
+			PresentationText presentationText = presentation.PresentationTexts.ToList()[i - 1];
+			for (int j = presentationText.LearningObjectives.Count; j > 0; j--)
+			{
+				LearningObjective learningObjective = presentationText.LearningObjectives.ToList()[j - 1];
+				await DeleteAsync(learningObjective);
+			}
+			await DeleteAsync(presentationText);
+		}
+
+		for (int i = presentation.PresentationTags.Count; i > 0; i--)
+		{
+			await DeleteAsync(presentation.PresentationTags.ToList()[i - 1]);
+		}
+
+		await DeleteAsync(presentation);
+
+		return $"The presentation '{permalink}' was successfully removed from the database.";
+
+	}
+
 	private async Task CreateNewTagsAsync(PresentationRequest presentationRequest)
 	{
 		foreach (string tagName in presentationRequest.Tags)
@@ -482,7 +510,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 				.ThenInclude(x => x.LearningObjectives)
 			.Include(x => x.PresentationTags)
 				.ThenInclude(x => x.Tag)
-			.FirstAsync(x => x.Permalink == permalink);
+			.FirstOrDefaultAsync(x => x.Permalink == permalink);
 	}
 
 	private async Task SaveOutputAsync(
