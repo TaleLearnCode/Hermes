@@ -60,6 +60,11 @@ public partial class Presentation
     /// </summary>
     public string DefaultLanguageCode { get; set; }
 
+    /// <summary>
+    /// The resources for the presentation.
+    /// </summary>
+    public string Resources { get; set; }
+
     public virtual Language DefaultLanguageCodeNavigation { get; set; }
 
     public virtual PresentationStatus PresentationStatus { get; set; }

@@ -172,7 +172,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 
 	//}
 
-	public async Task<MarkdownPresentationRequest> BuildPresentationRequestFromMarkdownAsync(string inputPath)
+	public static async Task<MarkdownPresentationRequest> BuildPresentationRequestFromMarkdownAsync(string inputPath)
 	{
 
 		List<string> markdownLines = [.. (await File.ReadAllLinesAsync(inputPath))];
@@ -181,6 +181,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		StringBuilder shortAbstract = new();
 		StringBuilder abstractText = new();
 		StringBuilder resources = new();
+		StringBuilder additionalDetails = new();
 		MarkdownPresentationRequest presentationRequest = new();
 
 		string? currentField = null;
@@ -206,6 +207,9 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 						break;
 					case MarkdownPresentationHeadings.Resources:
 						resources.AppendLine(currentMarkdownLine);
+						break;
+					case MarkdownPresentationHeadings.AdditionalDetails:
+						additionalDetails.AppendLine(currentMarkdownLine);
 						break;
 					case MarkdownPresentationHeadings.Tags:
 						if (!string.IsNullOrWhiteSpace(currentMarkdownLine))
@@ -267,9 +271,11 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			PublicRepoLink = presentationRequest.PublicRepoLink,
 			PrivateRepoLink = presentationRequest.PrivateRepoLink,
 			Permalink = presentationRequest.Permalink,
+			OriginalThumbnailUrl = presentationRequest.Thumbnail,
 			IsArchived = presentationRequest.IsArchived,
 			IncludeInPublicProfile = presentationRequest.IncludeInPublicProfile,
 			DefaultLanguageCode = presentationRequest.DefaultLanguageCode,
+			Resources = presentationRequest.Resources,
 			PresentationTexts = GetNewPresentationTexts(presentationRequest),
 			PresentationTags = await GetNewPresentationTagsAsync(presentationRequest)
 		});
@@ -485,6 +491,34 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 		Presentation presentation = await GetFirstOrDefaultAsync<Presentation>(x => x.Permalink == presentationRequest.Permalink);
 		if (presentation is not null)
 			throw new ArgumentException($"The presentation with the permalink '{presentationRequest.Permalink}' already exists in the database.");
+
+		if (presentationRequest.Permalink?.Length > 200)
+			throw new ArgumentException($"The permalink '{presentationRequest.Permalink}' exceeds the maximum length of 200 characters.");
+		if (presentationRequest.Thumbnail?.Length > 200)
+			throw new ArgumentException($"The thumbnail URL '{presentationRequest.Thumbnail}' exceeds the maximum length of 200 characters.");
+		if (presentationRequest.Resources?.Length > 3000)
+			throw new ArgumentException($"The resources '{presentationRequest.Resources}' exceeds the maximum length of 3000 characters.");
+		if (presentationRequest.ShortTitle?.Length > 60)
+			throw new ArgumentException($"The short title '{presentationRequest.ShortTitle}' exceeds the maximum length of 60 characters.");
+		if (presentationRequest.Title?.Length > 300)
+			throw new ArgumentException($"The title '{presentationRequest.Title}' exceeds the maximum length of 300 characters.");
+		if (presentationRequest.ElevatorPitch?.Length > 160)
+			throw new ArgumentException($"The elevator pitch '{presentationRequest.ElevatorPitch}' exceeds the maximum length of 160 characters.");
+		if (presentationRequest.AdditionalDetails?.Length > 3000)
+			throw new ArgumentException($"The additional details '{presentationRequest.AdditionalDetails}' exceeds the maximum length of 3000 characters.");
+		foreach (string? learningObjective in presentationRequest.LearningObjectives)
+			if (learningObjective.Length > 1000)
+				throw new ArgumentException($"The learning objective '{learningObjective}' exceeds the maximum length of 1000 characters.");
+		foreach (string? tag in presentationRequest.Tags)
+			if (tag.Length > 100)
+				throw new ArgumentException($"The tag '{tag}' exceeds the maximum length of 100 characters.");
+
+		if (!Uri.TryCreate(presentationRequest.PublicRepoLink, UriKind.Absolute, out Uri? publicRepoLinkUri))
+			throw new ArgumentException($"The public repository link '{presentationRequest.PublicRepoLink}' is not a valid URL.");
+		if (!Uri.TryCreate(presentationRequest.PrivateRepoLink, UriKind.Absolute, out Uri? privateRepoLinkUri))
+			throw new ArgumentException($"The private repository link '{presentationRequest.PrivateRepoLink}' is not a valid URL.");
+		if (!Uri.TryCreate(presentationRequest.Thumbnail, UriKind.Absolute, out Uri? thumbnailUri))
+			throw new ArgumentException($"The thumbnail URL '{presentationRequest.Thumbnail}' is not a valid URL.");
 
 	}
 

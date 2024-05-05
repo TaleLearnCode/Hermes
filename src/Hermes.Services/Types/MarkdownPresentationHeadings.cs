@@ -9,4 +9,5 @@ internal static class MarkdownPresentationHeadings
 	internal const string Tags = "Tags";
 	internal const string LearningObjectives = "Learning Objectives";
 	internal const string Resources = "Resources";
+	internal const string AdditionalDetails = "Additional Details";
 }

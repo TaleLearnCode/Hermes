@@ -1,15 +1,16 @@
 ﻿CREATE TABLE dbo.Presentation
 (
-  PresentationId         INT           NOT NULL IDENTITY(1,1),
-  PresentationTypeId     INT           NOT NULL,
-  PresentationStatusId   INT           NOT NULL CONSTRAINT dfPresentation_PresentationStatusId DEFAULT 1,
-  PublicRepoLink         VARCHAR(200)      NULL,
-  PrivateRepoLink        VARCHAR(200)      NULL,
-  Permalink              VARCHAR(200)  NOT NULL,
-  OriginalThumbnailUrl   VARCHAR(200)      NULL,
-  IsArchived             BIT           NOT NULL CONSTRAINT dfPresentation_IsArchived DEFAULT 0,
-  IncludeInPublicProfile BIT           NOT NULL CONSTRAINT dfPresentation_IncludeInPublicProfile DEFAULT 1,
-  DefaultLanguageCode    CHAR(2)       NOT NULL CONSTRAINT dfPresentation_DefaultLanguageCode DEFAULT 'en',
+  PresentationId         INT            NOT NULL IDENTITY(1,1),
+  PresentationTypeId     INT            NOT NULL,
+  PresentationStatusId   INT            NOT NULL CONSTRAINT dfPresentation_PresentationStatusId DEFAULT 1,
+  PublicRepoLink         VARCHAR(200)       NULL,
+  PrivateRepoLink        VARCHAR(200)       NULL,
+  Permalink              VARCHAR(200)   NOT NULL,
+  OriginalThumbnailUrl   VARCHAR(200)       NULL,
+  IsArchived             BIT            NOT NULL CONSTRAINT dfPresentation_IsArchived DEFAULT 0,
+  IncludeInPublicProfile BIT            NOT NULL CONSTRAINT dfPresentation_IncludeInPublicProfile DEFAULT 1,
+  DefaultLanguageCode    CHAR(2)        NOT NULL CONSTRAINT dfPresentation_DefaultLanguageCode DEFAULT 'en',
+  Resources              NVARCHAR(3000)     NULL,
   CONSTRAINT pkcPresentation PRIMARY KEY CLUSTERED (PresentationId),
   CONSTRAINT fkPresentation_PresentationType FOREIGN KEY (PresentationTypeId) REFERENCES dbo.PresentationType (PresentationTypeId),
   CONSTRAINT fkPresentation_PresentationStatus FOREIGN KEY (PresentationStatusId) REFERENCES dbo.PresentationStatus (PresentationStatusId),
@@ -39,6 +40,8 @@ GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'Presentation', @level2name=N'IncludeInPublicProfile',                @value=N'Flag indicating whether the presentation is to be include in the public profile.',                                   @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'Presentation', @level2name=N'DefaultLanguageCode',                   @value=N'The default language to use for the presentation.',                                                                  @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
+GO
+EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'Presentation', @level2name=N'Resources',                             @value=N'The resources for the presentation.',                                                                                @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'Presentation', @level2name=N'pkcPresentation',                       @value=N'Defines the primary key for the Presentation table using the PresentationId column.',                                @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'CONSTRAINT';
 GO

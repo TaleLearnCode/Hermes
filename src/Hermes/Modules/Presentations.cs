@@ -117,7 +117,7 @@ internal class Presentations(string databaseConnectionString)
 			MarkdownPresentationRequest? presentationRequest = inputFormat switch
 			{
 				InputOutputFormat.Json => _presentationServices.BuildPresentationRequestFromJson(inputPath),
-				InputOutputFormat.Markdown => await _presentationServices.BuildPresentationRequestFromMarkdownAsync(inputPath),
+				InputOutputFormat.Markdown => await PresentationServices.BuildPresentationRequestFromMarkdownAsync(inputPath),
 				_ => null
 			};
 

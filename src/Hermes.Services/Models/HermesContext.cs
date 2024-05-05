@@ -116,6 +116,9 @@ public partial class HermesContext : DbContext
                 .HasMaxLength(200)
                 .IsUnicode(false)
                 .HasComment("The link to the public repository for the presentation.");
+            entity.Property(e => e.Resources)
+                .HasMaxLength(3000)
+                .HasComment("The resources for the presentation.");
 
             entity.HasOne(d => d.DefaultLanguageCodeNavigation).WithMany(p => p.Presentations)
                 .HasForeignKey(d => d.DefaultLanguageCode)
