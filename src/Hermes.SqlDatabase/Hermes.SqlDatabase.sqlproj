@@ -70,12 +70,14 @@
     <Build Include="tables\PresentationTag.sql" />
     <Build Include="tables\PresentationText.sql" />
     <Build Include="tables\LearningObjective.sql" />
+    <Build Include="CallForSpeakerStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Populate\Populate_Language.sql" />
     <None Include="Scripts\Populate\Populate_PresentationStatus.sql" />
     <None Include="Scripts\Populate\Populate_PresentationType.sql" />
     <None Include="Hermes.SqlDatabase.publish.xml" />
+    <None Include="Scripts\Populate\Populate_CallForSpeakerStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\Script.PostDeployment.sql" />

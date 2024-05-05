@@ -13,6 +13,8 @@ public partial class HermesContext : DbContext
     {
     }
 
+    public virtual DbSet<CallForSpeakerStatus> CallForSpeakerStatuses { get; set; }
+
     public virtual DbSet<Language> Languages { get; set; }
 
     public virtual DbSet<LearningObjective> LearningObjectives { get; set; }
@@ -31,6 +33,23 @@ public partial class HermesContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<CallForSpeakerStatus>(entity =>
+        {
+            entity.HasKey(e => e.CallForSpeakerStatusId).HasName("pkcCallForSpeakerStatus");
+
+            entity.ToTable("CallForSpeakerStatus", tb => tb.HasComment("Represents a status of a call for speakers."));
+
+            entity.Property(e => e.CallForSpeakerStatusId)
+                .ValueGeneratedNever()
+                .HasComment("The identifier of the call for speakers status record.");
+            entity.Property(e => e.CallForSpeakerStatusName)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasComment("The name of the call for speakers status.");
+            entity.Property(e => e.IsEnabled).HasComment("Indicates whether the call for speakers status is enabled.");
+            entity.Property(e => e.SortOrder).HasComment("The order in which the call for speakers status should be displayed.");
+        });
+
         modelBuilder.Entity<Language>(entity =>
         {
             entity.HasKey(e => e.LanguageCode).HasName("pkcLangauge");

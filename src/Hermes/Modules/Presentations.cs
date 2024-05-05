@@ -11,7 +11,7 @@ internal class Presentations(string databaseConnectionString)
 
 	#region Command Line Argument Initialization
 
-	internal void InitializePresentationsCommand(RootCommand rootCommand)
+	internal void Initialize(RootCommand rootCommand)
 	{
 		Command presentationCommand = new("presentations", "Work with the 'Presentations' module.");
 		rootCommand.AddCommand(presentationCommand);
