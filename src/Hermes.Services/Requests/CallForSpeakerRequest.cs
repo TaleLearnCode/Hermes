@@ -15,10 +15,10 @@ public class CallForSpeakerRequest
 	public string EventCountryDivisionCode { get; set; }
 	public string EventTimeZone { get; set; }
 	public string CallForSpeakerUrl { get; set; }
-	public DateOnly CallForSpeakerStartDate { get; set; }
-	public DateOnly CallForSpeakerEndDate { get; set; }
+	public DateOnly? CallForSpeakerStartDate { get; set; } = null;
+	public DateOnly? CallForSpeakerEndDate { get; set; } = null;
 	public bool IncludesSpeakerHonorarium { get; set; }
-	public decimal SpeakerHonorariumAmount { get; set; }
+	public decimal? SpeakerHonorariumAmount { get; set; } = null;
 	public string SpeakerHonorariumCurrency { get; set; }
 	public string SpeakerHonorariumNotes { get; set; }
 	public bool AreTravelExpenseCovered { get; set; }
@@ -27,5 +27,5 @@ public class CallForSpeakerRequest
 	public string AccomodationNotes { get; set; }
 	public bool EventFeeCovered { get; set; }
 	public string EventFeeNotes { get; set; }
-	public int SubmissionLimit { get; set; }
+	public int? SubmissionLimit { get; set; }
 }

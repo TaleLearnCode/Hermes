@@ -30,5 +30,10 @@ public partial class CallForSpeakerStatus
     /// </summary>
     public bool IsEnabled { get; set; }
 
+    /// <summary>
+    /// Indicates whether the call for speakers status is the default status.
+    /// </summary>
+    public bool IsDefault { get; set; }
+
     public virtual ICollection<CallForSpeaker> CallForSpeakers { get; set; } = new List<CallForSpeaker>();
 }

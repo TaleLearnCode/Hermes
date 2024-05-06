@@ -152,6 +152,7 @@ public partial class HermesContext : DbContext
                 .IsRequired()
                 .HasMaxLength(50)
                 .HasComment("The name of the call for speakers status.");
+            entity.Property(e => e.IsDefault).HasComment("Indicates whether the call for speakers status is the default status.");
             entity.Property(e => e.IsEnabled).HasComment("Indicates whether the call for speakers status is enabled.");
             entity.Property(e => e.SortOrder).HasComment("The order in which the call for speakers status should be displayed.");
         });

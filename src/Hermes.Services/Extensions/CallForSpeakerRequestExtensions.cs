@@ -2,8 +2,8 @@
 
 internal static class CallForSpeakerRequestExtensions
 {
-	private const string _permalinkInstructions = "[REQUIRED] The unique permalink for the call for speakers";
-	private const string _statusInstructions = "[REQUIRED] The status of the call for speakers.";
+	private const string _permalinkInstructions = "[OPTIONAL] The unique permalink for the call for speakers";
+	private const string _statusInstructions = "[OPTIONAL] The status of the call for speakers.";
 	private const string _callForSpeakersUrlInstructions = "[OPTIONAL] The URL for the call for speakers webpage.";
 	private const string _callForSpeakersStartDateInstructions = "[OPTIONAL] The start date of the call for speakers.";
 	private const string _callForSpeakersEndDateInstructions = "[OPTIONAL] The end date of the call for speakers.";
@@ -22,8 +22,8 @@ internal static class CallForSpeakerRequestExtensions
 	private const string _eventUrlInstructions = "[OPTIONAL] The URL for the event.";
 	private const string _eventStartDateInstructions = "[REQUIRED] The event start date.";
 	private const string _eventEndDateInstructions = "[REQUIRED] The event end date.";
-	private const string _eventLocationInstructions = "[REQUIRED] The location of the event.";
-	private const string _eventCityInstructions = "[REQUIRED] The city where the event is held.";
+	private const string _eventLocationInstructions = "[OPTIONAL] The location of the event.";
+	private const string _eventCityInstructions = "[OPTIONAL] The city where the event is held.";
 	private const string _eventCountryCodeInstructions = "[REQUIRED] The 2-character code for the country where the event is held.";
 	private const string _eventCountryDivisionCodeInstructions = "[OPTIONAL] The 2-character code for the country division where the event is held.";
 	private const string _eventTimeZoneInstructions = "[OPTIONAL] The IANA time zone for the event's location.";
@@ -93,6 +93,75 @@ internal static class CallForSpeakerRequestExtensions
 		callForSpeaker.EventCountryCode = _eventCountryCodeInstructions;
 		callForSpeaker.EventCountryDivisionCode = _eventCountryDivisionCodeInstructions;
 		callForSpeaker.EventTimeZone = _eventTimeZoneInstructions;
+	}
+
+	internal static CallForSpeakerRequest ToCallForSpeakerRequest(this string markdown)
+	{
+		string[] lines = markdown.Split(Environment.NewLine);
+		CallForSpeakerRequest callForSpeakerRequest = new();
+		foreach (string line in lines)
+		{
+			string attributeValue = (line.Contains('|')) ? line.Split('|')[2].Trim() : line;
+			if (line.Contains(MarkdownCallForSpeakersAttributes.Permalink))
+				callForSpeakerRequest.Permalink = attributeValue;
+			else if (line.Contains(MarkdownCallForSpeakersAttributes.Status))
+				callForSpeakerRequest.Status = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventName))
+				callForSpeakerRequest.EventName = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventUrl))
+				callForSpeakerRequest.EventUrl = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventStartDate))
+				callForSpeakerRequest.EventStartDate = GetDateOnly(MarkdownCallForSpeakersAttributes.EventStartDate, attributeValue);
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventEndDate))
+				callForSpeakerRequest.EventEndDate = GetDateOnly(MarkdownCallForSpeakersAttributes.EventEndDate, attributeValue);
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventLocation))
+				callForSpeakerRequest.EventLocation = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventCity))
+				callForSpeakerRequest.EventCity = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventCountryCode))
+				callForSpeakerRequest.EventCountryCode = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventCountryDivisionCode))
+				callForSpeakerRequest.EventCountryDivisionCode = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventTimeZone))
+				callForSpeakerRequest.EventTimeZone = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.CallForSpeakerUrl))
+				callForSpeakerRequest.CallForSpeakerUrl = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.CallForSpeakersStartDate))
+				callForSpeakerRequest.CallForSpeakerStartDate = GetDateOnly(MarkdownCallForSpeakersAttributes.CallForSpeakersStartDate, attributeValue);
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.CallForSpeakersEndDate))
+				callForSpeakerRequest.CallForSpeakerEndDate = GetDateOnly(MarkdownCallForSpeakersAttributes.CallForSpeakersEndDate, attributeValue);
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.IncludesSpeakerHonorarium))
+				callForSpeakerRequest.IncludesSpeakerHonorarium = bool.Parse(attributeValue);
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SpeakerHonorariumAmount))
+				callForSpeakerRequest.SpeakerHonorariumAmount = decimal.Parse(attributeValue);
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SpeakerHonorariumCurrency))
+				callForSpeakerRequest.SpeakerHonorariumCurrency = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SpeakerHonorariumNotes))
+				callForSpeakerRequest.SpeakerHonorariumNotes = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.AreTravelExpensesCovered))
+				callForSpeakerRequest.AreTravelExpenseCovered = bool.Parse(attributeValue);
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.TravelNotes))
+				callForSpeakerRequest.TravelNotes = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.AreAccommodationsCovered))
+				callForSpeakerRequest.AreAccommodationsCovered = bool.Parse(attributeValue);
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.AccomodationNotes))
+				callForSpeakerRequest.AccomodationNotes = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.IsEventFeeCovered))
+				callForSpeakerRequest.EventFeeCovered = bool.Parse(attributeValue);
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventFeeNotes))
+				callForSpeakerRequest.EventFeeNotes = attributeValue;
+			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SubmissionLimit))
+				callForSpeakerRequest.SubmissionLimit = int.Parse(attributeValue);
+		}
+		return callForSpeakerRequest;
+	}
+
+	private static DateOnly GetDateOnly(string attributeName, string attributeValue)
+	{
+		if (DateOnly.TryParse(attributeValue, out DateOnly date))
+			return date;
+		else
+			throw new ArgumentException($"The '{attributeName[2..]}");
 	}
 
 }
