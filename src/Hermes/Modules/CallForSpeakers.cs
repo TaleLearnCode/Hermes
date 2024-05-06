@@ -13,6 +13,7 @@ internal class CallForSpeakers(string databaseConnectionString) : ModuleBase
 
 		InitializeStatuses(presentationCommand);
 		InitializeTemplate(presentationCommand);
+		InitializeAdd(presentationCommand);
 	}
 
 	#region Get Statuses
@@ -80,10 +81,45 @@ internal class CallForSpeakers(string databaseConnectionString) : ModuleBase
 
 	private void GetTemplate(string outputPath, string? outputFormatOption)
 	{
-		InputOutputFormat outputFormat = DetermineOutputFormat(outputFormatOption, InputOutputFormat.Markdown, outputPath);
-		outputPath = DetermineOutputPath(outputPath, outputFormat, "callforspeakers-template");
+		InputOutputFormat outputFormat = DetermineFileFormat(outputFormatOption, InputOutputFormat.Markdown, outputPath);
+		outputPath = DetermineFilePath(outputPath, outputFormat, "callforspeakers-template");
 		if (!VerifyIfOverwrite(outputPath)) return;
-		AnsiConsole.WriteLine(_callForSpeakerServices.GetTemplate(outputFormat, outputPath));
+		AnsiConsole.WriteLine(_callForSpeakerServices.GetCallForSpeakerTemplate(outputFormat, outputPath));
+	}
+
+	#endregion
+
+	#region Add
+
+	private void InitializeAdd(Command presentationCommand)
+	{
+		Option<string> inputOption = new(new[] { "--input", "-i" }, "Path to the input file.");
+		Option<string> inputFormatOption = new(new[] { "--inputFormat", "-if" }, "The format of the input file. Must be 'markdown' or 'json'.");
+		Option<string> outputOption = new(new[] { "--output", "-o" }, "Path to the output file.");
+		Option<string> outputFormatOption = new(new[] { "--outputFormat", "-of" }, "The format of the output file. Must be 'markdown' or 'json'.");
+
+		Command addCommand = new("add", "Adds a call for speakers.");
+		addCommand.AddOption(inputOption);
+		addCommand.AddOption(inputFormatOption);
+		addCommand.AddOption(outputOption);
+		addCommand.AddOption(outputFormatOption);
+		presentationCommand.AddCommand(addCommand);
+		addCommand.SetHandler(AddCallForSpeakersAsync, inputOption, inputFormatOption, outputOption, outputFormatOption);
+	}
+
+	private async Task AddCallForSpeakersAsync(string inputPath, string? inputFormatOption, string? outputPath, string? outputFormatOption)
+	{
+
+		InputOutputFormat inputFormat = DetermineFileFormat(inputFormatOption, InputOutputFormat.Console, inputPath);
+		if (inputFormat == InputOutputFormat.Console)
+			throw new ArgumentException("The input file format is not supported. Please specify 'markdown' or 'json'.");
+
+		inputPath = DetermineFilePath(inputPath, inputFormat, "callforspeakers");
+
+		InputOutputFormat outputFormat = DetermineFileFormat(outputFormatOption, inputFormat, outputPath, true);
+
+		AnsiConsole.WriteLine(await _callForSpeakerServices.AddCallForSpeakerAsync(inputPath, inputFormat, outputPath, outputFormat));
+
 	}
 
 	#endregion

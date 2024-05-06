@@ -3,36 +3,40 @@
 internal abstract class ModuleBase
 {
 
-	protected InputOutputFormat DetermineOutputFormat(string? outputFormatOption, InputOutputFormat defaultOutputFormat, string? outputPath)
+	protected InputOutputFormat DetermineFileFormat(
+		string? fileFormatOption,
+		InputOutputFormat defaultFileFormat,
+		string? filePath,
+		bool fileFormatOptional = false)
 	{
-		if (string.IsNullOrEmpty(outputFormatOption))
+		if (string.IsNullOrEmpty(fileFormatOption))
 		{
-			if (!string.IsNullOrWhiteSpace(outputPath))
+			if (!string.IsNullOrWhiteSpace(filePath))
 			{
-				return Path.GetExtension(outputPath).ToLowerInvariant() switch
+				return Path.GetExtension(filePath).ToLowerInvariant() switch
 				{
 					".json" => InputOutputFormat.Json,
 					".md" => InputOutputFormat.Markdown,
-					_ => throw new ArgumentException("The output file format is not supported. Please specify 'markdown' or 'json'."),
+					_ => throw new ArgumentException("The file format is not supported. Please specify 'markdown' or 'json'."),
 				};
 			}
 			else
 			{
-				return defaultOutputFormat;
+				return defaultFileFormat;
 			}
 		}
 		else
 		{
-			return outputFormatOption.ToLowerInvariant() switch
+			return fileFormatOption.ToLowerInvariant() switch
 			{
 				"json" => InputOutputFormat.Json,
 				"markdown" => InputOutputFormat.Markdown,
-				_ => throw new ArgumentException("The output file format is not supported. Please specify 'markdown' or 'json'."),
+				_ => (fileFormatOptional) ? InputOutputFormat.Console : throw new ArgumentException("The file format is not supported. Please specify 'markdown' or 'json'."),
 			};
 		}
 	}
 
-	protected string DetermineOutputPath(string? outputPath, InputOutputFormat outputFormat, string defaultOutputPath)
+	protected string DetermineFilePath(string? outputPath, InputOutputFormat outputFormat, string defaultOutputPath)
 	{
 		if (!string.IsNullOrWhiteSpace(outputPath))
 			return outputPath;
@@ -42,7 +46,7 @@ internal abstract class ModuleBase
 			{
 				InputOutputFormat.Json => $"{defaultOutputPath}.json",
 				InputOutputFormat.Markdown => $"{defaultOutputPath}.md",
-				_ => throw new ArgumentException("The output file format is not supported. Please specify 'markdown' or 'json'."),
+				_ => throw new ArgumentException("The file format is not supported. Please specify 'markdown' or 'json'."),
 			};
 		}
 	}
