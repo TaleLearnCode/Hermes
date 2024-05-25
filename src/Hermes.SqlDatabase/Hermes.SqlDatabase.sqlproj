@@ -80,6 +80,15 @@
     <Build Include="Tables\SubmissionStatus.sql" />
     <Build Include="Tables\SubmissionLearningObjective.sql" />
     <Build Include="Tables\SubmissionTag.sql" />
+    <Build Include="Tables\Engagement.sql" />
+    <Build Include="Tables\EngagementType.sql" />
+    <Build Include="Tables\EngagementStatus.sql" />
+    <Build Include="Tables\EngagementPresentation.sql" />
+    <Build Include="Tables\EngagementPresentationStatus.sql" />
+    <Build Include="Tables\EngagementPresentationTag.sql" />
+    <Build Include="Tables\EngagementPresentationLearningObjective.sql" />
+    <Build Include="Tables\EngagementCallForSpekers.sql" />
+    <Build Include="Tables\EngagementCallForSpeakerStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Populate\Populate_Language.sql" />
@@ -92,6 +101,10 @@
     <None Include="Scripts\Populate\Populate_WorldRegion.sql" />
     <None Include="Scripts\Populate\Populate_TimeZone.sql" />
     <None Include="Scripts\Populate\Populate_SubmissionStatus.sql" />
+    <None Include="Scripts\Populate\Populate_EngagementType.sql" />
+    <None Include="Scripts\Populate\Populate_EngagementStatus.sql" />
+    <None Include="Scripts\Populate\Populate_EngagementPresentationStatus.sql" />
+    <None Include="Scripts\Populate\Populate_EngagementCallForSpeakerStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\Script.PostDeployment.sql" />
