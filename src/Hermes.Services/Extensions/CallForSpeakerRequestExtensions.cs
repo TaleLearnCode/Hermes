@@ -1,4 +1,7 @@
-﻿namespace Hermes.Extensions;
+﻿using Hermes.Types;
+using System.Text;
+
+namespace Hermes.Extensions;
 
 internal static class CallForSpeakerRequestExtensions
 {
@@ -27,6 +30,22 @@ internal static class CallForSpeakerRequestExtensions
 	private const string _eventCountryCodeInstructions = "[REQUIRED] The 2-character code for the country where the event is held.";
 	private const string _eventCountryDivisionCodeInstructions = "[OPTIONAL] The 2-character code for the country division where the event is held.";
 	private const string _eventTimeZoneInstructions = "[OPTIONAL] The IANA time zone for the event's location.";
+
+	private const string _submissionStatusInstructions = "[OPTIONAL] The status of the submission. Default is 'Under Review'.";
+	private const string _submissionDateInstructions = "[OPTIONAL] The date the submission was made. Default is the current date.";
+	private const string _expectedDecisionDateInstructions = "[OPTIONAL] The expected date for a decision on the submission. If not specified, will default to six weeks after the call for speakers end date (if available) or 4 weeks prior to the event start date.";
+	private const string _decisionDateInstructions = "[OPTIONAL] The date the submission was accepted or rejected.";
+	private const string _languageCodeInstructions = "[OPTIONAL] The language code for the submission. Default is 'en'.";
+	private const string _presentationPermalinkInstructions = "[REQUIRED] The unique permalink for the presentation.";
+	private const string _sessionTitleInstructions = "[OPTIONAL] The title of the session. If not specified, the saved title for the presentation will be used.";
+	private const string _sessionDescriptionInstructions = "[OPTIONAL] The description of the session. If not specified, the saved abstract for the presentation will be used.";
+	private const string _sessionLengthInstructions = "[OPTIONAL] The length of the session in minutes.";
+	private const string _sessionTrackInstructions = "[OPTIONAL] The track for the session.";
+	private const string _sessionLevelInstructions = "[OPTIONAL] The level of the session.";
+	private const string _elevatorPitchInstructions = "[OPTIONAL] A brief elevator pitch for the session.";
+	private const string _additionalDetailsInstructions = "[OPTIONAL] Any additional details for the session.";
+	private const string _learningObjectivesInstructions = "[OPTIONAL] A list of learning objectives for the session.";
+	private const string _tagsInstructions = "[OPTIONAL] A list of tags for the session.";
 
 	internal static string ToMarkdown(this CallForSpeakerRequest callForSpeakerRequest, bool populateWithInstructions = false)
 	{
@@ -63,6 +82,37 @@ internal static class CallForSpeakerRequestExtensions
 		response.AppendLine($"{MarkdownCallForSpeakersAttributes.EventCountryCode} | {((!populateWithInstructions) ? callForSpeakerRequest.EventCountryCode : _eventCountryCodeInstructions)} |");
 		response.AppendLine($"{MarkdownCallForSpeakersAttributes.EventCountryDivisionCode} | {((!populateWithInstructions) ? callForSpeakerRequest.EventCountryDivisionCode : _eventCountryDivisionCodeInstructions)} |");
 		response.AppendLine($"{MarkdownCallForSpeakersAttributes.EventTimeZone} | {((!populateWithInstructions) ? callForSpeakerRequest.EventTimeZone : _eventTimeZoneInstructions)} |");
+		response.AppendLine();
+		response.AppendLine($"## {MarkdownCallForSpeakersHeadings.Submissions}");
+		response.AppendLine();
+		response.AppendLine($"### {MarkdownSubmissionHeadings.Submission} - {{presentation-permalink}}");
+		response.AppendLine();
+		response.AppendLine("| Attribute | Value |");
+		response.AppendLine("|---|---|");
+		response.AppendLine($"{MarkdownSubmissionAttributes.SessionTitle} | {((!populateWithInstructions) ? callForSpeakerRequest.Submissions[0].SessionTitle : _sessionTitleInstructions)} |");
+		response.AppendLine($"{MarkdownSubmissionAttributes.Status} | {((!populateWithInstructions) ? callForSpeakerRequest.Submissions[0].Status : _submissionStatusInstructions)} |");
+		response.AppendLine($"{MarkdownSubmissionAttributes.SubmissionDate} | {((!populateWithInstructions) ? callForSpeakerRequest.Submissions[0].SubmissionDate : _submissionDateInstructions)} |");
+		response.AppendLine($"{MarkdownSubmissionAttributes.ExpectedDecisionDate} | {((!populateWithInstructions) ? callForSpeakerRequest.Submissions[0].ExpectedDecisionDate : _expectedDecisionDateInstructions)} |");
+		response.AppendLine($"{MarkdownSubmissionAttributes.DecisionDate} | {((!populateWithInstructions) ? callForSpeakerRequest.Submissions[0].DecisionDate : _decisionDateInstructions)} |");
+		response.AppendLine($"{MarkdownSubmissionAttributes.LanguageCode} | {((!populateWithInstructions) ? callForSpeakerRequest.Submissions[0].LanguageCode : _languageCodeInstructions)} |");
+		response.AppendLine($"{MarkdownSubmissionAttributes.SessionLength} | {((!populateWithInstructions) ? callForSpeakerRequest.Submissions[0].SessionLength : _sessionLengthInstructions)} |");
+		response.AppendLine($"{MarkdownSubmissionAttributes.SessionTrack} | {((!populateWithInstructions) ? callForSpeakerRequest.Submissions[0].SessionTrack : _sessionTrackInstructions)} |");
+		response.AppendLine($"{MarkdownSubmissionAttributes.SessionLevel} | {((!populateWithInstructions) ? callForSpeakerRequest.Submissions[0].SessionLevel : _sessionLevelInstructions)} |");
+		response.AppendLine();
+		response.AppendLine($"#### {MarkdownSubmissionHeadings.Description}");
+		response.AppendLine(_sessionDescriptionInstructions);
+		response.AppendLine();
+		response.AppendLine($"#### {MarkdownSubmissionHeadings.ElevatorPitch}");
+		response.AppendLine(_elevatorPitchInstructions);
+		response.AppendLine();
+		response.AppendLine($"#### {MarkdownSubmissionHeadings.AdditionalDetails}");
+		response.AppendLine(_additionalDetailsInstructions);
+		response.AppendLine();
+		response.AppendLine($"#### {MarkdownSubmissionHeadings.LearningObjectives}");
+		response.AppendLine($"- {_learningObjectivesInstructions}");
+		response.AppendLine();
+		response.AppendLine($"#### {MarkdownSubmissionHeadings.Tags}");
+		response.AppendLine($" -{_tagsInstructions}");
 		return response.ToString();
 	}
 
@@ -93,67 +143,223 @@ internal static class CallForSpeakerRequestExtensions
 		callForSpeaker.EventCountryCode = _eventCountryCodeInstructions;
 		callForSpeaker.EventCountryDivisionCode = _eventCountryDivisionCodeInstructions;
 		callForSpeaker.EventTimeZone = _eventTimeZoneInstructions;
+		callForSpeaker.Submissions.Add(new()
+		{
+			Status = _submissionStatusInstructions,
+			SubmissionDate = DateOnly.FromDateTime(DateTime.UtcNow),
+			ExpectedDecisionDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(42),
+			DecisionDate = DateOnly.FromDateTime(DateTime.UtcNow).AddDays(-28),
+			LanguageCode = _languageCodeInstructions,
+			PresentationPermalink = _presentationPermalinkInstructions,
+			SessionTitle = _sessionTitleInstructions,
+			SessionDescription = _sessionDescriptionInstructions,
+			SessionLength = 60,
+			SessionTrack = _sessionTrackInstructions,
+			SessionLevel = _sessionLevelInstructions,
+			ElevatorPitch = _elevatorPitchInstructions,
+			AdditionalDetails = _additionalDetailsInstructions,
+			LearningObjectives = [_learningObjectivesInstructions],
+			Tags = [_tagsInstructions]
+		});
 	}
 
 	internal static CallForSpeakerRequest ToCallForSpeakerRequest(this string markdown)
 	{
 		string[] lines = markdown.Split(Environment.NewLine);
 		CallForSpeakerRequest callForSpeakerRequest = new();
+		Dictionary<string, SubmissionDetail> submissions = [];
+		string? currentField = null;
+		string? currentSubmission = null;
+		string? currentSubmissionField = null;
+		string? attributeValue = null;
+		List<string> submittedPresentations = [];
 		foreach (string line in lines)
 		{
-			string attributeValue = (line.Contains('|')) ? line.Split('|')[2].Trim() : line;
-			if (line.Contains(MarkdownCallForSpeakersAttributes.Permalink))
-				callForSpeakerRequest.Permalink = attributeValue;
-			else if (line.Contains(MarkdownCallForSpeakersAttributes.Status))
-				callForSpeakerRequest.Status = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventName))
-				callForSpeakerRequest.EventName = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventUrl))
-				callForSpeakerRequest.EventUrl = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventStartDate))
-				callForSpeakerRequest.EventStartDate = GetDateOnly(MarkdownCallForSpeakersAttributes.EventStartDate, attributeValue);
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventEndDate))
-				callForSpeakerRequest.EventEndDate = GetDateOnly(MarkdownCallForSpeakersAttributes.EventEndDate, attributeValue);
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventLocation))
-				callForSpeakerRequest.EventLocation = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventCity))
-				callForSpeakerRequest.EventCity = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventCountryCode))
-				callForSpeakerRequest.EventCountryCode = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventCountryDivisionCode))
-				callForSpeakerRequest.EventCountryDivisionCode = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventTimeZone))
-				callForSpeakerRequest.EventTimeZone = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.CallForSpeakerUrl))
-				callForSpeakerRequest.CallForSpeakerUrl = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.CallForSpeakersStartDate))
-				callForSpeakerRequest.CallForSpeakerStartDate = GetDateOnly(MarkdownCallForSpeakersAttributes.CallForSpeakersStartDate, attributeValue);
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.CallForSpeakersEndDate))
-				callForSpeakerRequest.CallForSpeakerEndDate = GetDateOnly(MarkdownCallForSpeakersAttributes.CallForSpeakersEndDate, attributeValue);
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.IncludesSpeakerHonorarium))
-				callForSpeakerRequest.IncludesSpeakerHonorarium = bool.Parse(attributeValue);
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SpeakerHonorariumAmount))
-				callForSpeakerRequest.SpeakerHonorariumAmount = decimal.Parse(attributeValue);
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SpeakerHonorariumCurrency))
-				callForSpeakerRequest.SpeakerHonorariumCurrency = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SpeakerHonorariumNotes))
-				callForSpeakerRequest.SpeakerHonorariumNotes = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.AreTravelExpensesCovered))
-				callForSpeakerRequest.AreTravelExpenseCovered = bool.Parse(attributeValue);
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.TravelNotes))
-				callForSpeakerRequest.TravelNotes = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.AreAccommodationsCovered))
-				callForSpeakerRequest.AreAccommodationsCovered = bool.Parse(attributeValue);
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.AccomodationNotes))
-				callForSpeakerRequest.AccomodationNotes = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.IsEventFeeCovered))
-				callForSpeakerRequest.EventFeeCovered = bool.Parse(attributeValue);
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventFeeNotes))
-				callForSpeakerRequest.EventFeeNotes = attributeValue;
-			else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SubmissionLimit))
-				callForSpeakerRequest.SubmissionLimit = int.Parse(attributeValue);
+			string currentMarkdownLine = line.Trim();
+			if (currentMarkdownLine.StartsWith("## "))
+			{
+				currentField = currentMarkdownLine[3..];
+				if (currentField == MarkdownCallForSpeakersHeadings.Submissions)
+					currentSubmissionField = null;
+			}
+			else if (currentMarkdownLine.StartsWith("### "))
+			{
+				currentSubmission = currentMarkdownLine.Split("-")[1].Trim();
+				submissions.Add(currentSubmission, new SubmissionDetail { PresentationPermalink = currentSubmission });
+			}
+			else if (currentMarkdownLine.StartsWith("#### "))
+			{
+				currentSubmissionField = currentMarkdownLine[5..];
+			}
+			else
+			{
+				switch (currentField)
+				{
+					case MarkdownCallForSpeakersHeadings.CallForSpeakerDetails:
+						attributeValue = (line.Contains('|')) ? line.Split('|')[2].Trim() : line;
+						ParseCallForSpeakerDetail(callForSpeakerRequest, attributeValue, line);
+						break;
+					case MarkdownCallForSpeakersHeadings.EventDetails:
+						attributeValue = (line.Contains('|')) ? line.Split('|')[2].Trim() : line;
+						ParseEventDetail(callForSpeakerRequest, attributeValue, line);
+						break;
+					case MarkdownCallForSpeakersHeadings.Submissions:
+						if (currentSubmission is not null)
+						{
+							switch (currentSubmissionField)
+							{
+								case MarkdownSubmissionHeadings.SubmissionDetails:
+									attributeValue = (line.Contains('|')) ? line.Split('|')[2].Trim() : line;
+									ParseSubmissionDetail(submissions, currentSubmission, attributeValue, line);
+									break;
+								case MarkdownSubmissionHeadings.Description:
+									submissions[currentSubmission].Description.AppendLine(line);
+									break;
+								case MarkdownSubmissionHeadings.ElevatorPitch:
+									submissions[currentSubmission].ElevatorPitch.AppendLine(line);
+									break;
+								case MarkdownSubmissionHeadings.AdditionalDetails:
+									submissions[currentSubmission].AdditionalDetails.AppendLine(line);
+									break;
+								case MarkdownSubmissionHeadings.LearningObjectives:
+									if (line.StartsWith("-"))
+										submissions[currentSubmission].LearningObjectives.Add(line[1..]);
+									break;
+								case MarkdownSubmissionHeadings.Tags:
+									if (line.StartsWith("-"))
+										submissions[currentSubmission].Tags.Add(line[1..]);
+									break;
+							}
+						}
+						break;
+				}
+			}
 		}
+
+		foreach (SubmissionDetail submission in submissions.Values)
+		{
+			callForSpeakerRequest.Submissions.Add(new SubmissionRequest
+			{
+				Status = submission.Status,
+				SubmissionDate = submission.SubmissionDate,
+				DecisionDate = submission.DecisionDate,
+				LanguageCode = submission.LanguageCode,
+				PresentationPermalink = submission.PresentationPermalink!,
+				SessionTitle = submission.Title,
+				SessionDescription = submission.Description.ToString(),
+				SessionLength = submission.Length,
+				SessionTrack = submission.Track,
+				SessionLevel = submission.Level,
+				ElevatorPitch = submission.ElevatorPitch.ToString(),
+				AdditionalDetails = submission.AdditionalDetails.ToString(),
+				LearningObjectives = submission.LearningObjectives,
+				Tags = submission.Tags
+			});
+		}
+
+		foreach (string presentation in submittedPresentations)
+		{
+			if (!callForSpeakerRequest.Submissions.Any(s => s.PresentationPermalink == presentation))
+			{
+				callForSpeakerRequest.Submissions.Add(new SubmissionRequest { PresentationPermalink = presentation });
+			}
+		}
+
+
+
+
 		return callForSpeakerRequest;
+	}
+
+	private static void ParseSubmissionDetail(
+		Dictionary<string, SubmissionDetail> submissions,
+		string? currentSubmission,
+		string attributeValue,
+		string line)
+	{
+		if (currentSubmission is not null)
+		{
+			if (line.StartsWith(MarkdownSubmissionAttributes.SessionTitle))
+				submissions[currentSubmission].Title = attributeValue;
+			else if (line.StartsWith(MarkdownSubmissionAttributes.Status))
+				submissions[currentSubmission].Status = attributeValue;
+			else if (line.StartsWith(MarkdownSubmissionAttributes.SubmissionDate))
+				submissions[currentSubmission].SubmissionDate = GetDateOnly(MarkdownSubmissionAttributes.SubmissionDate, attributeValue);
+			else if (line.StartsWith(MarkdownSubmissionAttributes.DecisionDate))
+				submissions[currentSubmission].DecisionDate = GetDateOnly(MarkdownSubmissionAttributes.DecisionDate, attributeValue);
+			else if (line.StartsWith(MarkdownSubmissionAttributes.LanguageCode))
+				submissions[currentSubmission].LanguageCode = attributeValue;
+			else if (line.StartsWith(MarkdownSubmissionAttributes.SessionLength))
+				submissions[currentSubmission].Length = int.Parse(attributeValue);
+			else if (line.StartsWith(MarkdownSubmissionAttributes.SessionTrack))
+				submissions[currentSubmission].Track = attributeValue;
+			else if (line.StartsWith(MarkdownSubmissionAttributes.SessionLevel))
+				submissions[currentSubmission].Level = attributeValue;
+		}
+	}
+
+	private static void ParseEventDetail(
+		CallForSpeakerRequest callForSpeakerRequest,
+		string attributeValue,
+		string line)
+	{
+		if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventName))
+			callForSpeakerRequest.EventName = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventUrl))
+			callForSpeakerRequest.EventUrl = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventStartDate))
+			callForSpeakerRequest.EventStartDate = GetDateOnly(MarkdownCallForSpeakersAttributes.EventStartDate, attributeValue);
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventEndDate))
+			callForSpeakerRequest.EventEndDate = GetDateOnly(MarkdownCallForSpeakersAttributes.EventEndDate, attributeValue);
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventLocation))
+			callForSpeakerRequest.EventLocation = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventCity))
+			callForSpeakerRequest.EventCity = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventCountryCode))
+			callForSpeakerRequest.EventCountryCode = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventCountryDivisionCode))
+			callForSpeakerRequest.EventCountryDivisionCode = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventTimeZone))
+			callForSpeakerRequest.EventTimeZone = attributeValue;
+	}
+
+	private static void ParseCallForSpeakerDetail(
+		CallForSpeakerRequest callForSpeakerRequest,
+		string attributeValue,
+		string line)
+	{
+		if (line.Contains(MarkdownCallForSpeakersAttributes.Permalink))
+			callForSpeakerRequest.Permalink = attributeValue;
+		else if (line.Contains(MarkdownCallForSpeakersAttributes.Status))
+			callForSpeakerRequest.Status = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.CallForSpeakerUrl))
+			callForSpeakerRequest.CallForSpeakerUrl = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.CallForSpeakersStartDate))
+			callForSpeakerRequest.CallForSpeakerStartDate = GetDateOnly(MarkdownCallForSpeakersAttributes.CallForSpeakersStartDate, attributeValue);
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.CallForSpeakersEndDate))
+			callForSpeakerRequest.CallForSpeakerEndDate = GetDateOnly(MarkdownCallForSpeakersAttributes.CallForSpeakersEndDate, attributeValue);
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.IncludesSpeakerHonorarium))
+			callForSpeakerRequest.IncludesSpeakerHonorarium = bool.Parse(attributeValue);
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SpeakerHonorariumAmount))
+			callForSpeakerRequest.SpeakerHonorariumAmount = decimal.Parse(attributeValue);
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SpeakerHonorariumCurrency))
+			callForSpeakerRequest.SpeakerHonorariumCurrency = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SpeakerHonorariumNotes))
+			callForSpeakerRequest.SpeakerHonorariumNotes = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.AreTravelExpensesCovered))
+			callForSpeakerRequest.AreTravelExpenseCovered = bool.Parse(attributeValue);
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.TravelNotes))
+			callForSpeakerRequest.TravelNotes = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.AreAccommodationsCovered))
+			callForSpeakerRequest.AreAccommodationsCovered = bool.Parse(attributeValue);
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.AccomodationNotes))
+			callForSpeakerRequest.AccomodationNotes = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.IsEventFeeCovered))
+			callForSpeakerRequest.EventFeeCovered = bool.Parse(attributeValue);
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.EventFeeNotes))
+			callForSpeakerRequest.EventFeeNotes = attributeValue;
+		else if (line.StartsWith(MarkdownCallForSpeakersAttributes.SubmissionLimit))
+			callForSpeakerRequest.SubmissionLimit = int.Parse(attributeValue);
 	}
 
 	private static DateOnly GetDateOnly(string attributeName, string attributeValue)

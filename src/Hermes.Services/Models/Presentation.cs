@@ -74,4 +74,6 @@ public partial class Presentation
     public virtual ICollection<PresentationText> PresentationTexts { get; set; } = new List<PresentationText>();
 
     public virtual PresentationType PresentationType { get; set; }
+
+    public virtual ICollection<Submission> Submissions { get; set; } = new List<Submission>();
 }

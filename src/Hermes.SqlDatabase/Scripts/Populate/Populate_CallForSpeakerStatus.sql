@@ -1,7 +1,7 @@
 ﻿MERGE dbo.CallForSpeakerStatus AS TARGET
 USING (VALUES ( 1, 1, 1, 0, 'Pending'),
               ( 2, 1, 2, 1, 'Open'),
-              ( 3, 1, 3, 0, 'In Evaluation'),
+              ( 3, 1, 3, 0, 'Under Review'),
               ( 4, 1, 4, 0, 'Dormant'),
               ( 5, 1, 5, 0, 'Closed'))
 AS SOURCE (CallForSpeakerStatusId,

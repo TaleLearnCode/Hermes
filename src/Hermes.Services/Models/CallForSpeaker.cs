@@ -80,6 +80,11 @@ public partial class CallForSpeaker
     public DateOnly? CallForSpeakerEndDate { get; set; }
 
     /// <summary>
+    /// The expected decision date for the submissions.
+    /// </summary>
+    public DateOnly? ExpectedDecisionDate { get; set; }
+
+    /// <summary>
     /// Indicates if the speaker will receive a honorarium.
     /// </summary>
     public bool SpeakerHonorarium { get; set; }
@@ -141,4 +146,6 @@ public partial class CallForSpeaker
     public virtual Country EventCountryCodeNavigation { get; set; }
 
     public virtual TimeZone EventTimeZone { get; set; }
+
+    public virtual ICollection<Submission> Submissions { get; set; } = new List<Submission>();
 }

@@ -60,6 +60,22 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[Submission]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SubmissionLearningObjective]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SubmissionStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[SubmissionTag]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[Tag]",
          "ObjectType": 0
       },

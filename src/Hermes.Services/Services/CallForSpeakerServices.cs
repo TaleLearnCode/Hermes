@@ -1,4 +1,6 @@
-﻿namespace Hermes.Services;
+﻿using Hermes.Types;
+
+namespace Hermes.Services;
 
 public class CallForSpeakerServices(string databaseConnectionString) : ServicesBase(databaseConnectionString)
 {
@@ -12,7 +14,7 @@ public class CallForSpeakerServices(string databaseConnectionString) : ServicesB
 		if (outputFormat == InputOutputFormat.Json)
 		{
 			callForSpeakerRequest.AddInstructions();
-			return SerializeAndSaveFile<CallForSpeakerRequest>(outputPath, callForSpeakerRequest);
+			return SerializeAndSaveFile(outputPath, callForSpeakerRequest);
 		}
 		else if (outputFormat == InputOutputFormat.Markdown)
 		{
@@ -55,17 +57,11 @@ public class CallForSpeakerServices(string databaseConnectionString) : ServicesB
 	{
 		string input = File.ReadAllText(inputPath);
 		if (inputFormat == InputOutputFormat.Json)
-		{
 			return JsonSerializer.Deserialize<CallForSpeakerRequest>(input);
-		}
 		else if (inputFormat == InputOutputFormat.Markdown)
-		{
 			return input.ToCallForSpeakerRequest();
-		}
 		else
-		{
 			return null;
-		}
 	}
 
 	private async Task<bool> IsRequestValidAsync(CallForSpeakerRequest callForSpeakerRequest, bool checkForUniqueness = false)
@@ -122,6 +118,28 @@ public class CallForSpeakerServices(string databaseConnectionString) : ServicesB
 		if (callForSpeakerRequest.EventFeeNotes?.Length > 500)
 			throw new ArgumentException("Event fee notes is too long. It must be less than 500 characters.");
 
+		foreach (SubmissionRequest submissionRequest in callForSpeakerRequest.Submissions)
+		{
+			Presentation? presentation = await GetFirstOrDefaultAsync<Presentation>(x => x.Permalink == submissionRequest.PresentationPermalink)
+				?? throw new ArgumentException($"'{submissionRequest.PresentationPermalink}' is not a valid presentation permalink.");
+			if (string.IsNullOrWhiteSpace(submissionRequest.Status))
+				submissionRequest.Status = callForSpeakerStatuses.First(x => x.IsDefault).CallForSpeakerStatusName;
+			if (callForSpeakerStatuses.FirstOrDefault(x => x.CallForSpeakerStatusName == submissionRequest.Status) is null)
+				throw new ArgumentException($"'{submissionRequest.Status}' is not a valid status.");
+
+			if (submissionRequest.SessionTitle?.Length > 300)
+				throw new ArgumentException("Session title is too long. It must be less than 300 characters.");
+			if (submissionRequest.SessionDescription?.Length > 3000)
+				throw new ArgumentException("Session description is too long. It must be less than 3000 characters.");
+			if (submissionRequest.SessionTrack?.Length > 100)
+				throw new ArgumentException("Session track is too long. It must be less than 100 characters.");
+			if (submissionRequest.SessionLevel?.Length > 100)
+				throw new ArgumentException("Session level is too long. It must be less than 100 characters.");
+			if (submissionRequest.ElevatorPitch?.Length > 300)
+				throw new ArgumentException("Elevator pitch is too long. It must be less than 300 characters.");
+			if (submissionRequest.AdditionalDetails?.Length > 3000)
+				throw new ArgumentException("Additional details is too long. It must be less than 3000 characters.");
+		}
 
 		return true;
 	}
@@ -164,7 +182,7 @@ public class CallForSpeakerServices(string databaseConnectionString) : ServicesB
 
 	private async Task<CallForSpeaker> ConvertRequestToCallForSpeaker(CallForSpeakerRequest callForSpeakerRequest)
 	{
-		CallForSpeaker response = new CallForSpeaker
+		CallForSpeaker response = new()
 		{
 			Permalink = callForSpeakerRequest.Permalink,
 			CallForSpeakerStatusId = (await GetFirstOrDefaultAsync<CallForSpeakerStatus>(x => x.CallForSpeakerStatusName == callForSpeakerRequest.Status))!.CallForSpeakerStatusId,
@@ -190,14 +208,48 @@ public class CallForSpeakerServices(string databaseConnectionString) : ServicesB
 			AccomodationNotes = (!string.IsNullOrWhiteSpace(callForSpeakerRequest.AccomodationNotes)) ? callForSpeakerRequest.AccomodationNotes : null,
 			EventFeeCovered = callForSpeakerRequest.EventFeeCovered,
 			EventFeeNotes = (!string.IsNullOrWhiteSpace(callForSpeakerRequest.EventFeeNotes)) ? callForSpeakerRequest.EventFeeNotes : null,
-			SubmissionLimit = callForSpeakerRequest.SubmissionLimit
+			SubmissionLimit = callForSpeakerRequest.SubmissionLimit,
+			Submissions = await ConvertRequestToSubmissions(callForSpeakerRequest.Submissions)
+		};
+		return response;
+	}
+
+	private async Task<List<Submission>> ConvertRequestToSubmissions(List<SubmissionRequest> submissionRequests)
+	{
+		List<Submission> response = [];
+		foreach (SubmissionRequest submissionRequest in submissionRequests)
+		{
+			Submission submission = await ConvertRequestToSubmission(submissionRequest);
+			response.Add(submission);
+		}
+		return response;
+	}
+
+	private async Task<Submission> ConvertRequestToSubmission(SubmissionRequest submissionRequest)
+	{
+		PresentationText? presentationText = await GetFirstOrDefaultAsync<PresentationText>
+			(x => x.Presentation.Permalink == submissionRequest.PresentationPermalink
+			&& x.LanguageCode == submissionRequest.LanguageCode)
+			?? throw new ArgumentException($"The presentation '{submissionRequest.PresentationPermalink}' does not have a '{submissionRequest.LanguageCode}' translation.");
+		Submission response = new()
+		{
+			SubmissionStatusId = (await GetFirstOrDefaultAsync<SubmissionStatus>(x => x.SubmissionStatusName == submissionRequest.Status))!.SubmissionStatusId,
+			SubmissionDate = submissionRequest.SubmissionDate,
+			DecisionDate = submissionRequest.DecisionDate,
+			SubmissionLanguageCode = submissionRequest.LanguageCode,
+			SessionTitle = (!string.IsNullOrWhiteSpace(submissionRequest.SessionTitle)) ? submissionRequest.SessionTitle : presentationText.PresentationTitle,
+			SessionDescription = (!string.IsNullOrWhiteSpace(submissionRequest.SessionDescription)) ? submissionRequest.SessionDescription : presentationText.Abstract,
+			SessionLength = submissionRequest.SessionLength ?? default,
+			SessionTrack = (!string.IsNullOrWhiteSpace(submissionRequest.SessionTrack)) ? submissionRequest.SessionTrack : null,
+			SessionLevel = (!string.IsNullOrWhiteSpace(submissionRequest.SessionLevel)) ? submissionRequest.SessionLevel : null,
+			ElevatorPitch = (!string.IsNullOrWhiteSpace(submissionRequest.ElevatorPitch)) ? submissionRequest.ElevatorPitch : null,
+			AdditionalDetails = (!string.IsNullOrWhiteSpace(submissionRequest.AdditionalDetails)) ? submissionRequest.AdditionalDetails : null
 		};
 		return response;
 	}
 
 	private static CallForSpeakerRequest ConvertCallForSpeakerToRequest(CallForSpeaker callForSpeaker)
-	{
-		return new()
+		=> new()
 		{
 			Permalink = callForSpeaker.Permalink,
 			Status = callForSpeaker.CallForSpeakerStatus.CallForSpeakerStatusName,
@@ -223,9 +275,31 @@ public class CallForSpeakerServices(string databaseConnectionString) : ServicesB
 			AccomodationNotes = callForSpeaker.AccomodationNotes,
 			EventFeeCovered = callForSpeaker.EventFeeCovered,
 			EventFeeNotes = callForSpeaker.EventFeeNotes,
-			SubmissionLimit = callForSpeaker.SubmissionLimit
+			SubmissionLimit = callForSpeaker.SubmissionLimit,
+			Submissions = ConvertSubmissionsToRequest(callForSpeaker.Submissions)
 		};
-	}
+
+	private static List<SubmissionRequest> ConvertSubmissionsToRequest(ICollection<Submission> submissions)
+		=> submissions.Select(AddSubmissionToCallForSpeakerRequest).ToList();
+
+	private static SubmissionRequest AddSubmissionToCallForSpeakerRequest(Submission submission)
+		=> new()
+		{
+			Status = submission.SubmissionStatus.SubmissionStatusName,
+			SubmissionDate = submission.SubmissionDate,
+			DecisionDate = submission.DecisionDate,
+			LanguageCode = submission.SubmissionLanguageCode,
+			PresentationPermalink = submission.Presentation.Permalink,
+			SessionTitle = submission.SessionTitle,
+			SessionDescription = submission.SessionDescription,
+			SessionLength = submission.SessionLength,
+			SessionTrack = submission.SessionTrack,
+			SessionLevel = submission.SessionLevel,
+			ElevatorPitch = submission.ElevatorPitch,
+			AdditionalDetails = submission.AdditionalDetails,
+			LearningObjectives = submission.SubmissionLearningObjectives.Select(x => x.LearningObjectiveText).ToList(),
+			Tags = submission.SubmissionTags.Select(x => x.Tag.TagName).ToList()
+		};
 
 	private async Task SaveOutputAsync(
 		string permalink,

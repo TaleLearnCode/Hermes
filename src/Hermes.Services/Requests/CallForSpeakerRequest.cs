@@ -28,4 +28,5 @@ public class CallForSpeakerRequest
 	public bool EventFeeCovered { get; set; }
 	public string EventFeeNotes { get; set; }
 	public int? SubmissionLimit { get; set; }
+	public List<SubmissionRequest> Submissions { get; set; } = [];
 }

@@ -6,3 +6,4 @@
 :r .\Populate\Populate_Country.sql
 :r .\Populate\Populate_CountryDivision.sql
 :r .\Populate\Populate_TimeZone.sql
+:r .\Populate\Populate_SubmissionStatus.sql

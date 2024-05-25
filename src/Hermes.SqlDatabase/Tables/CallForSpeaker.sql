@@ -15,6 +15,7 @@
   CallForSpeakerUrl           NVARCHAR(200)     NULL,
   CallForSpeakerStartDate     DATE              NULL,
   CallForSpeakerEndDate       DATE              NULL,
+  ExpectedDecisionDate        DATE              NULL,
   SpeakerHonorarium           BIT           NOT NULL CONSTRAINT dfCallForSpeaker_SpeakerHonorarium DEFAULT 0,
   SpeakerHonorariumAmount     DECIMAL(10,2)     NULL,
   SpeakerHonorariumCurrency   CHAR(3)           NULL,
@@ -61,6 +62,8 @@ GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'CallForSpeaker', @level2name=N'CallForSpeakerStartDate',                       @value=N'The start date of the call for speaker.',                                                         @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'CallForSpeaker', @level2name=N'CallForSpeakerEndDate',                         @value=N'The end date of the call for speaker.',                                                           @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
+GO
+EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'CallForSpeaker', @level2name=N'ExpectedDecisionDate',                          @value=N'The expected decision date for the submissions.',                                                @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'CallForSpeaker', @level2name=N'SpeakerHonorarium',                             @value=N'Indicates if the speaker will receive a honorarium.',                                             @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO

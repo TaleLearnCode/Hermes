@@ -76,6 +76,10 @@
     <Build Include="Tables\TimeZone.sql" />
     <Build Include="Tables\CallForSpeaker.sql" />
     <Build Include="Tables\CallForSpeakerStatus.sql" />
+    <Build Include="Tables\Submission.sql" />
+    <Build Include="Tables\SubmissionStatus.sql" />
+    <Build Include="Tables\SubmissionLearningObjective.sql" />
+    <Build Include="Tables\SubmissionTag.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Populate\Populate_Language.sql" />
@@ -87,6 +91,7 @@
     <None Include="Scripts\Populate\Populate_CountryDivision.sql" />
     <None Include="Scripts\Populate\Populate_WorldRegion.sql" />
     <None Include="Scripts\Populate\Populate_TimeZone.sql" />
+    <None Include="Scripts\Populate\Populate_SubmissionStatus.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\Script.PostDeployment.sql" />
