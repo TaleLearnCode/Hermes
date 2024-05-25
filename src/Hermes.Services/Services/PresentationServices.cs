@@ -1,6 +1,4 @@
 ﻿using Hermes.Responses;
-using Hermes.Types;
-using System.Text;
 
 namespace Hermes.Services;
 
@@ -234,7 +232,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 	private static void UpdatePresentationText(PresentationRequest presentationRequest, Presentation presentation)
 	{
 		PresentationText presentationText = presentation.PresentationTexts
-			.FirstOrDefault(x => x.PresentationId == presentation.PresentationId)
+			.FirstOrDefault(x => x.PresentationId == presentation.Permalink)
 			?? GetNewPresentationText(presentationRequest);
 		presentationText.PresentationTitle = presentationRequest.Title;
 		presentationText.PresentationShortTitle = presentationRequest.ShortTitle;
@@ -371,7 +369,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			foreach (string tag in presentationRequest.Tags)
 			{
 				Tag? tagRecord = tags.FirstOrDefault(x => x.TagName == tag);
-				int tagId = tagRecord?.TagId ?? (await CreateAsync(new Tag { TagName = tag })).TagId;
+				int tagId = tagRecord?.TagId ?? (await CreateAsync(new Tag { TagName = tag, IsEnabled = true })).TagId;
 				presentationTags.Add(new() { TagId = tagId });
 			}
 		}
@@ -454,7 +452,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			throw new ArgumentException($"The public repository link '{presentationRequest.PublicRepoLink}' is not a valid URL.");
 		if (!Uri.TryCreate(presentationRequest.PrivateRepoLink, UriKind.Absolute, out Uri? privateRepoLinkUri))
 			throw new ArgumentException($"The private repository link '{presentationRequest.PrivateRepoLink}' is not a valid URL.");
-		if (!Uri.TryCreate(presentationRequest.Thumbnail, UriKind.Absolute, out Uri? thumbnailUri))
+		if (!string.IsNullOrWhiteSpace(presentationRequest.Thumbnail) && !Uri.TryCreate(presentationRequest.Thumbnail, UriKind.Absolute, out Uri? thumbnailUri))
 			throw new ArgumentException($"The thumbnail URL '{presentationRequest.Thumbnail}' is not a valid URL.");
 
 	}

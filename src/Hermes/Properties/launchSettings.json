@@ -2,7 +2,7 @@
   "profiles": {
     "Hermes": {
       "commandName": "Project",
-      "commandLineArgs": "callforspeakers add -i tunisia-dev-days-2024.md",
+      "commandLineArgs": "presentations add -i architect-like-a-boss.md",
       "workingDirectory": "C:\\Repos\\Hermes\\src\\Hermes\\bin\\Debug\\net8.0"
     }
   }

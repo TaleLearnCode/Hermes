@@ -35,5 +35,5 @@ public partial class TimeZone
     /// </summary>
     public string DaylightOffset { get; set; }
 
-    public virtual ICollection<CallForSpeaker> CallForSpeakers { get; set; } = new List<CallForSpeaker>();
+    public virtual ICollection<Engagement> Engagements { get; set; } = new List<Engagement>();
 }

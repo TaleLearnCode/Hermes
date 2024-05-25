@@ -18,7 +18,7 @@ public partial class PresentationText
     /// <summary>
     /// The identifier of the associated presentation.
     /// </summary>
-    public int PresentationId { get; set; }
+    public string PresentationId { get; set; }
 
     public string LanguageCode { get; set; }
 

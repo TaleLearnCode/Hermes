@@ -13,13 +13,27 @@ public partial class HermesContext : DbContext
     {
     }
 
-    public virtual DbSet<CallForSpeaker> CallForSpeakers { get; set; }
-
-    public virtual DbSet<CallForSpeakerStatus> CallForSpeakerStatuses { get; set; }
-
     public virtual DbSet<Country> Countries { get; set; }
 
     public virtual DbSet<CountryDivision> CountryDivisions { get; set; }
+
+    public virtual DbSet<Engagement> Engagements { get; set; }
+
+    public virtual DbSet<EngagementCallForSpeakerStatus> EngagementCallForSpeakerStatuses { get; set; }
+
+    public virtual DbSet<EngagementCallForSpeker> EngagementCallForSpekers { get; set; }
+
+    public virtual DbSet<EngagementPresentation> EngagementPresentations { get; set; }
+
+    public virtual DbSet<EngagementPresentationLearningObjective> EngagementPresentationLearningObjectives { get; set; }
+
+    public virtual DbSet<EngagementPresentationStatus> EngagementPresentationStatuses { get; set; }
+
+    public virtual DbSet<EngagementPresentationTag> EngagementPresentationTags { get; set; }
+
+    public virtual DbSet<EngagementStatus> EngagementStatuses { get; set; }
+
+    public virtual DbSet<EngagementType> EngagementTypes { get; set; }
 
     public virtual DbSet<Language> Languages { get; set; }
 
@@ -35,14 +49,6 @@ public partial class HermesContext : DbContext
 
     public virtual DbSet<PresentationType> PresentationTypes { get; set; }
 
-    public virtual DbSet<Submission> Submissions { get; set; }
-
-    public virtual DbSet<SubmissionLearningObjective> SubmissionLearningObjectives { get; set; }
-
-    public virtual DbSet<SubmissionStatus> SubmissionStatuses { get; set; }
-
-    public virtual DbSet<SubmissionTag> SubmissionTags { get; set; }
-
     public virtual DbSet<Tag> Tags { get; set; }
 
     public virtual DbSet<TimeZone> TimeZones { get; set; }
@@ -51,119 +57,6 @@ public partial class HermesContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<CallForSpeaker>(entity =>
-        {
-            entity.HasKey(e => e.CallForSpeakerId).HasName("pkcCallForSpeaker");
-
-            entity.ToTable("CallForSpeaker");
-
-            entity.Property(e => e.CallForSpeakerId).HasComment("The identifier of the call for speaker.");
-            entity.Property(e => e.AccomodationExpensesCovered).HasComment("Indicates if the event will cover the accomodation expenses of the speaker.");
-            entity.Property(e => e.AccomodationNotes)
-                .HasMaxLength(500)
-                .HasComment("Additional notes about the accomodation expenses.");
-            entity.Property(e => e.CallForSpeakerEndDate).HasComment("The end date of the call for speaker.");
-            entity.Property(e => e.CallForSpeakerStartDate).HasComment("The start date of the call for speaker.");
-            entity.Property(e => e.CallForSpeakerStatusId).HasComment("The identifier of the call for speaker status.");
-            entity.Property(e => e.CallForSpeakerUrl)
-                .HasMaxLength(200)
-                .HasComment("The URL of the call for speaker.");
-            entity.Property(e => e.EventCity)
-                .HasMaxLength(100)
-                .HasComment("The city where the event is located.");
-            entity.Property(e => e.EventCountryCode)
-                .IsRequired()
-                .HasMaxLength(2)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasComment("The ISO 3166-1 alpha-2 country code where the event is located.");
-            entity.Property(e => e.EventCountryDivisionCode)
-                .HasMaxLength(3)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasComment("The ISO 3166-2 alpha-3 country division code where the event is located.");
-            entity.Property(e => e.EventEndDate).HasComment("The end date of the event.");
-            entity.Property(e => e.EventFeeCovered)
-                .HasDefaultValue(true)
-                .HasComment("Indicates if the event will cover the fee of the speaker.");
-            entity.Property(e => e.EventFeeNotes)
-                .HasMaxLength(500)
-                .HasComment("Additional notes about the event fee.");
-            entity.Property(e => e.EventLocation)
-                .HasMaxLength(300)
-                .HasComment("The location of the event.");
-            entity.Property(e => e.EventName)
-                .IsRequired()
-                .HasMaxLength(200)
-                .HasComment("The name of the event.");
-            entity.Property(e => e.EventStartDate).HasComment("The start date of the event.");
-            entity.Property(e => e.EventTimeZoneId)
-                .HasMaxLength(100)
-                .IsUnicode(false)
-                .HasComment("The identifier of the time zone where the event is located.");
-            entity.Property(e => e.EventUrl)
-                .HasMaxLength(200)
-                .HasComment("The URL of the event.");
-            entity.Property(e => e.ExpectedDecisionDate).HasComment("The expected decision date for the submissions.");
-            entity.Property(e => e.Permalink)
-                .IsRequired()
-                .HasMaxLength(200)
-                .IsUnicode(false);
-            entity.Property(e => e.SpeakerHonorarium).HasComment("Indicates if the speaker will receive a honorarium.");
-            entity.Property(e => e.SpeakerHonorariumAmount)
-                .HasComment("The amount of the honorarium.")
-                .HasColumnType("decimal(10, 2)");
-            entity.Property(e => e.SpeakerHonorariumCurrency)
-                .HasMaxLength(3)
-                .IsUnicode(false)
-                .IsFixedLength()
-                .HasComment("The currency of the honorarium.");
-            entity.Property(e => e.SpeakerHonorariumNotes)
-                .HasMaxLength(500)
-                .HasComment("Additional notes about the honorarium.");
-            entity.Property(e => e.SubmissionLimit).HasComment("The maximum number of submissions allowed.");
-            entity.Property(e => e.TravelExpensesCovered).HasComment("Indicates if the event will cover the travel expenses of the speaker.");
-            entity.Property(e => e.TravelNotes)
-                .HasMaxLength(500)
-                .HasComment("Additional notes about the travel expenses.");
-
-            entity.HasOne(d => d.CallForSpeakerStatus).WithMany(p => p.CallForSpeakers)
-                .HasForeignKey(d => d.CallForSpeakerStatusId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fkCallForSpeaker_CallForSpeakerStatus");
-
-            entity.HasOne(d => d.EventCountryCodeNavigation).WithMany(p => p.CallForSpeakers)
-                .HasForeignKey(d => d.EventCountryCode)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fkCallForSpeaker_Country");
-
-            entity.HasOne(d => d.EventTimeZone).WithMany(p => p.CallForSpeakers)
-                .HasForeignKey(d => d.EventTimeZoneId)
-                .HasConstraintName("fkCallForSpeaker_TimeZone");
-
-            entity.HasOne(d => d.CountryDivision).WithMany(p => p.CallForSpeakers)
-                .HasForeignKey(d => new { d.EventCountryCode, d.EventCountryDivisionCode })
-                .HasConstraintName("fkCallForSpeaker_CountryDivision");
-        });
-
-        modelBuilder.Entity<CallForSpeakerStatus>(entity =>
-        {
-            entity.HasKey(e => e.CallForSpeakerStatusId).HasName("pkcCallForSpeakerStatus");
-
-            entity.ToTable("CallForSpeakerStatus", tb => tb.HasComment("Represents a status of a call for speakers."));
-
-            entity.Property(e => e.CallForSpeakerStatusId)
-                .ValueGeneratedNever()
-                .HasComment("The identifier of the call for speakers status record.");
-            entity.Property(e => e.CallForSpeakerStatusName)
-                .IsRequired()
-                .HasMaxLength(50)
-                .HasComment("The name of the call for speakers status.");
-            entity.Property(e => e.IsDefault).HasComment("Indicates whether the call for speakers status is the default status.");
-            entity.Property(e => e.IsEnabled).HasComment("Indicates whether the call for speakers status is enabled.");
-            entity.Property(e => e.SortOrder).HasComment("The order in which the call for speakers status should be displayed.");
-        });
-
         modelBuilder.Entity<Country>(entity =>
         {
             entity.HasKey(e => e.CountryCode).HasName("pkcCountry");
@@ -241,6 +134,357 @@ public partial class HermesContext : DbContext
                 .HasConstraintName("fkCountryDivision_Country");
         });
 
+        modelBuilder.Entity<Engagement>(entity =>
+        {
+            entity.HasKey(e => e.Permalink).HasName("pkcEngagement");
+
+            entity.ToTable("Engagement", tb => tb.HasComment("Represents an engagement."));
+
+            entity.Property(e => e.Permalink)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The unique identifier for the engagement.");
+            entity.Property(e => e.City)
+                .IsRequired()
+                .HasMaxLength(100)
+                .HasComment("The city where the engagement is located.");
+            entity.Property(e => e.CountryCode)
+                .IsRequired()
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("The country code for the engagement.");
+            entity.Property(e => e.CountryDivisionCode)
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("The country division code for the engagement.");
+            entity.Property(e => e.EndDate).HasComment("The end date of the engagement.");
+            entity.Property(e => e.EndingCost)
+                .HasMaxLength(20)
+                .HasComment("The ending cost of the engagement.");
+            entity.Property(e => e.EngagementDescription)
+                .HasMaxLength(2000)
+                .HasComment("The description of the engagement.");
+            entity.Property(e => e.EngagementName)
+                .IsRequired()
+                .HasMaxLength(200)
+                .HasComment("The name of the engagement.");
+            entity.Property(e => e.EngagementStatusId)
+                .HasDefaultValue(1)
+                .HasComment("The identifier of the engagement status.");
+            entity.Property(e => e.EngagementSummary)
+                .HasMaxLength(140)
+                .HasComment("The summary of the engagement.");
+            entity.Property(e => e.EngagementTypeId)
+                .HasDefaultValue(1)
+                .HasComment("The identifier of the engagement type.");
+            entity.Property(e => e.EngagementUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The URL of the engagement.");
+            entity.Property(e => e.IncludeInPublicProfile)
+                .HasDefaultValue(true)
+                .HasComment("Flag indicating whether the engagement should be included in the public profile.");
+            entity.Property(e => e.IsEnabled)
+                .HasDefaultValue(true)
+                .HasComment("Flag indicating whether the engagement is enabled.");
+            entity.Property(e => e.IsPublic)
+                .HasDefaultValue(true)
+                .HasComment("Flag indicating whether the engagement is public.");
+            entity.Property(e => e.IsVirtual).HasComment("Flag indicating whether the engagement is virtual.");
+            entity.Property(e => e.ListingLocation)
+                .HasMaxLength(100)
+                .HasComment("The location of the engagement as it should be listed.");
+            entity.Property(e => e.OverviewLocation)
+                .HasMaxLength(300)
+                .HasComment("The location of the engagement.");
+            entity.Property(e => e.StartDate).HasComment("The start date of the engagement.");
+            entity.Property(e => e.StartingCost)
+                .HasMaxLength(20)
+                .HasComment("The starting cost of the engagement.");
+            entity.Property(e => e.TimeZoneId)
+                .IsRequired()
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasComment("The time zone of the engagement.");
+            entity.Property(e => e.Venue)
+                .HasMaxLength(200)
+                .HasComment("The venue where the engagement is located.");
+
+            entity.HasOne(d => d.CountryCodeNavigation).WithMany(p => p.Engagements)
+                .HasForeignKey(d => d.CountryCode)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagement_Country");
+
+            entity.HasOne(d => d.EngagementStatus).WithMany(p => p.Engagements)
+                .HasForeignKey(d => d.EngagementStatusId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagement_EngagementStatus");
+
+            entity.HasOne(d => d.EngagementType).WithMany(p => p.Engagements)
+                .HasForeignKey(d => d.EngagementTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagement_EngagementType");
+
+            entity.HasOne(d => d.TimeZone).WithMany(p => p.Engagements)
+                .HasForeignKey(d => d.TimeZoneId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagement_TimeZone");
+
+            entity.HasOne(d => d.CountryDivision).WithMany(p => p.Engagements)
+                .HasForeignKey(d => new { d.CountryCode, d.CountryDivisionCode })
+                .HasConstraintName("fkEngagement_CountryDivision");
+        });
+
+        modelBuilder.Entity<EngagementCallForSpeakerStatus>(entity =>
+        {
+            entity.HasKey(e => e.EngagementCallForSpeakerStatusId).HasName("pkcEngagementCallForSpeakerStatus");
+
+            entity.ToTable("EngagementCallForSpeakerStatus", tb => tb.HasComment("Represents a status of an engagement call for speakers."));
+
+            entity.Property(e => e.EngagementCallForSpeakerStatusId)
+                .ValueGeneratedNever()
+                .HasComment("The identifier of the engagement call for speakers status record.");
+            entity.Property(e => e.EngagementCallForSpeakerStatusName)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasComment("The name of the engagement call for speakers status.");
+            entity.Property(e => e.IsDefault).HasComment("Indicates whether the engagement call for speakers status is the default status.");
+            entity.Property(e => e.IsEnabled).HasComment("Indicates whether the engagement call for speakers status is enabled.");
+            entity.Property(e => e.SortOrder).HasComment("The order in which the engagement call for speakers status should be displayed.");
+            entity.Property(e => e.StatusDescription).HasMaxLength(500);
+        });
+
+        modelBuilder.Entity<EngagementCallForSpeker>(entity =>
+        {
+            entity.HasKey(e => e.EngagementPermalink).HasName("pkcEngagementCallForSpekers");
+
+            entity.Property(e => e.EngagementPermalink)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The permalink of the engagement.");
+            entity.Property(e => e.AccommodationCovered).HasComment("Indicates if accommodation is covered for speakers.");
+            entity.Property(e => e.AccommodationNotes)
+                .HasMaxLength(200)
+                .HasComment("Additional notes about accommodation for speakers.");
+            entity.Property(e => e.ActualDecisionDate).HasComment("The actual decision date for the call for speakers.");
+            entity.Property(e => e.CallForSpeakersUrl)
+                .IsRequired()
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The URL of the call for speakers.");
+            entity.Property(e => e.EndDate).HasComment("The end date of the call for speakers.");
+            entity.Property(e => e.EventFeeCovered).HasComment("Indicates if event fees are covered for speakers.");
+            entity.Property(e => e.EventFeeNotes)
+                .HasMaxLength(200)
+                .HasComment("Additional notes about event fees for speakers.");
+            entity.Property(e => e.ExpectedDecisionDate).HasComment("The expected decision date for the call for speakers.");
+            entity.Property(e => e.SpeakerHonorarium).HasComment("Indicates if a speaker honorarium is offered.");
+            entity.Property(e => e.SpeakerHonorariumAmount)
+                .HasComment("The amount of the speaker honorarium.")
+                .HasColumnType("decimal(10, 2)");
+            entity.Property(e => e.SpeakerHonorariumCurrency)
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .IsFixedLength()
+                .HasComment("The currency of the speaker honorarium.");
+            entity.Property(e => e.SpeakerHonorariumNotes)
+                .HasMaxLength(200)
+                .HasComment("Additional notes about the speaker honorarium.");
+            entity.Property(e => e.StartDate).HasComment("The start date of the call for speakers.");
+            entity.Property(e => e.SubmissionLimit)
+                .HasDefaultValue(-1)
+                .HasComment("The maximum number of submissions allowed per speaker.");
+            entity.Property(e => e.TravelExpensesCovered).HasComment("Indicates if travel expenses are covered for speakers.");
+            entity.Property(e => e.TravelExpensesNotes)
+                .HasMaxLength(200)
+                .HasComment("Additional notes about travel expenses for speakers.");
+
+            entity.HasOne(d => d.EngagementPermalinkNavigation).WithOne(p => p.EngagementCallForSpeker)
+                .HasForeignKey<EngagementCallForSpeker>(d => d.EngagementPermalink)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagementCallForSpekers_Engagement");
+        });
+
+        modelBuilder.Entity<EngagementPresentation>(entity =>
+        {
+            entity.HasKey(e => e.EngagementPresentationId).HasName("pkcEngagementPresentation");
+
+            entity.ToTable("EngagementPresentation");
+
+            entity.Property(e => e.EngagementPresentationId).HasComment("The identifier of the engagement presentation record.");
+            entity.Property(e => e.Abstract)
+                .HasMaxLength(3000)
+                .HasComment("The full abstract for the presentation.");
+            entity.Property(e => e.AdditionalDetails)
+                .HasMaxLength(3000)
+                .HasComment("Additional details for the presentation.");
+            entity.Property(e => e.ElevatorPitch)
+                .HasMaxLength(160)
+                .HasComment("The summary for the presentation.");
+            entity.Property(e => e.EngagementId)
+                .IsRequired()
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The identifier of the associated engagement.");
+            entity.Property(e => e.EngagementPresentationStatusId)
+                .HasDefaultValue(1)
+                .HasComment("The identifier of the status of the engagement presentation.");
+            entity.Property(e => e.EngagementPresentationUrl)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The URL for the engagement presentation.");
+            entity.Property(e => e.IsEnabled)
+                .HasDefaultValue(true)
+                .HasComment("Flag indicating whether the engagement presentation is enabled.");
+            entity.Property(e => e.LangaugeCode)
+                .IsRequired()
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .HasDefaultValue("en")
+                .IsFixedLength()
+                .HasComment("The language code for the presentation.");
+            entity.Property(e => e.PresentationId)
+                .IsRequired()
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The identifier of the associated presentation.");
+            entity.Property(e => e.PresentationLength).HasComment("The length of the presentation in minutes.");
+            entity.Property(e => e.PresentationShortTitle)
+                .HasMaxLength(60)
+                .HasComment("The short title of the presentation.");
+            entity.Property(e => e.PresentationTitle)
+                .IsRequired()
+                .HasMaxLength(300)
+                .HasComment("The full title of the presentation.");
+            entity.Property(e => e.Room)
+                .HasMaxLength(100)
+                .HasComment("The room where the presentation will be held.");
+            entity.Property(e => e.ShortAbstract)
+                .HasMaxLength(2000)
+                .HasComment("The short abstract for the presentation.");
+            entity.Property(e => e.StartDateTime).HasComment("The date and time the engagement presentation starts.");
+
+            entity.HasOne(d => d.Engagement).WithMany(p => p.EngagementPresentations)
+                .HasForeignKey(d => d.EngagementId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagementPresentation_Engagement");
+
+            entity.HasOne(d => d.EngagementPresentationStatus).WithMany(p => p.EngagementPresentations)
+                .HasForeignKey(d => d.EngagementPresentationStatusId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagementPresentation_EngagementPresentationStatus");
+
+            entity.HasOne(d => d.Presentation).WithMany(p => p.EngagementPresentations)
+                .HasForeignKey(d => d.PresentationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagementPresentation_Presentation");
+        });
+
+        modelBuilder.Entity<EngagementPresentationLearningObjective>(entity =>
+        {
+            entity.HasKey(e => e.EngagementPresentationLearningObjectiveId).HasName("pkcEngagementPresentationLearningObjective");
+
+            entity.ToTable("EngagementPresentationLearningObjective", tb => tb.HasComment("Represents a learning objective of an engagement presentation."));
+
+            entity.HasIndex(e => new { e.EngagementPresentationId, e.SortOrder }, "ucEngagementPresentationLearningObjective").IsUnique();
+
+            entity.Property(e => e.EngagementPresentationLearningObjectiveId).HasComment("The identifier of the engagement presentation learning objective record.");
+            entity.Property(e => e.EngagementPresentationId).HasComment("The identifier of the engagement presentation.");
+            entity.Property(e => e.LearningObjectiveText)
+                .IsRequired()
+                .HasMaxLength(1000)
+                .HasComment("The text of the learning objective.");
+            entity.Property(e => e.SortOrder).HasComment("The sorting order of the learning objective.");
+
+            entity.HasOne(d => d.EngagementPresentation).WithMany(p => p.EngagementPresentationLearningObjectives)
+                .HasForeignKey(d => d.EngagementPresentationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagementPresentationLearningObjective_EngagementPresentation");
+        });
+
+        modelBuilder.Entity<EngagementPresentationStatus>(entity =>
+        {
+            entity.HasKey(e => e.EngagementPresentationStatusId).HasName("pkcEngagementPresentationStatus");
+
+            entity.ToTable("EngagementPresentationStatus", tb => tb.HasComment("Represents a status of an engagement presentation."));
+
+            entity.Property(e => e.EngagementPresentationStatusId)
+                .ValueGeneratedNever()
+                .HasComment("The identifier of the engagement presentation status record.");
+            entity.Property(e => e.EngagementPresentationStatusName)
+                .IsRequired()
+                .HasMaxLength(100)
+                .HasComment("The name of the engagement presentation status.");
+            entity.Property(e => e.IsEnabled).HasComment("Flag indicating whether the engagement presentation status is enabled.");
+            entity.Property(e => e.SortOrder).HasComment("The sorting order of the engagement presentation status.");
+            entity.Property(e => e.StatusDescription)
+                .HasMaxLength(500)
+                .HasComment("A description of the engagement presentation status.");
+        });
+
+        modelBuilder.Entity<EngagementPresentationTag>(entity =>
+        {
+            entity.HasKey(e => e.EngagementPresentationTagId).HasName("pkcEngagementPresentationTag");
+
+            entity.ToTable("EngagementPresentationTag", tb => tb.HasComment("Associates a tag with an engagement presentation."));
+
+            entity.Property(e => e.EngagementPresentationTagId).HasComment("The identifier of the engagement presentation tag record.");
+            entity.Property(e => e.EngagementPresentationId).HasComment("The identifier of the engagement presentation.");
+            entity.Property(e => e.TagId).HasComment("The identifier of the associated tag.");
+
+            entity.HasOne(d => d.EngagementPresentation).WithMany(p => p.EngagementPresentationTags)
+                .HasForeignKey(d => d.EngagementPresentationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagementPresentationTag_EngagementPresentation");
+
+            entity.HasOne(d => d.Tag).WithMany(p => p.EngagementPresentationTags)
+                .HasForeignKey(d => d.TagId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagementPresentationTag_Tag");
+        });
+
+        modelBuilder.Entity<EngagementStatus>(entity =>
+        {
+            entity.HasKey(e => e.EngagementStatusId).HasName("pkcEngagementStatus");
+
+            entity.ToTable("EngagementStatus", tb => tb.HasComment("Represents a status of an engagement."));
+
+            entity.Property(e => e.EngagementStatusId)
+                .ValueGeneratedNever()
+                .HasComment("The identifier of the engagement status record.");
+            entity.Property(e => e.EngagementStatusName)
+                .IsRequired()
+                .HasMaxLength(100)
+                .HasComment("The name of the engagement status.");
+            entity.Property(e => e.IsEnabled).HasComment("Flag indicating whether the engagement status is enabled.");
+            entity.Property(e => e.SortOrder).HasComment("The sorting order of the engagement status.");
+            entity.Property(e => e.StatusDescription)
+                .HasMaxLength(500)
+                .HasComment("A description of the engagement status.");
+        });
+
+        modelBuilder.Entity<EngagementType>(entity =>
+        {
+            entity.HasKey(e => e.EngagementTypeId).HasName("pkcEngagementType");
+
+            entity.ToTable("EngagementType", tb => tb.HasComment("Represents a type of an engagement."));
+
+            entity.Property(e => e.EngagementTypeId)
+                .ValueGeneratedNever()
+                .HasComment("The identifier of the engagement type record.");
+            entity.Property(e => e.EngagementTypeName)
+                .IsRequired()
+                .HasMaxLength(100)
+                .HasComment("The name of the engagement type.");
+            entity.Property(e => e.IsEnabled).HasComment("Flag indicating whether the engagement type is enabled.");
+            entity.Property(e => e.SortOrder).HasComment("The sorting order of the engagement type.");
+            entity.Property(e => e.TypeDescription)
+                .HasMaxLength(500)
+                .HasComment("A description of the engagement type.");
+        });
+
         modelBuilder.Entity<Language>(entity =>
         {
             entity.HasKey(e => e.LanguageCode).HasName("pkcLangauge");
@@ -287,13 +531,16 @@ public partial class HermesContext : DbContext
 
         modelBuilder.Entity<Presentation>(entity =>
         {
-            entity.HasKey(e => e.PresentationId).HasName("pkcPresentation");
+            entity.HasKey(e => e.Permalink).HasName("pkcPresentation");
 
             entity.ToTable("Presentation", tb => tb.HasComment("Represents the speaker's presentations."));
 
             entity.HasIndex(e => e.Permalink, "unqPresentation_Permalink").IsUnique();
 
-            entity.Property(e => e.PresentationId).HasComment("The identifier of the presentation record.");
+            entity.Property(e => e.Permalink)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The permament link for the presentation.");
             entity.Property(e => e.DefaultLanguageCode)
                 .IsRequired()
                 .HasMaxLength(2)
@@ -309,11 +556,6 @@ public partial class HermesContext : DbContext
                 .HasMaxLength(200)
                 .IsUnicode(false)
                 .HasComment("The original thumbnail image for the presentation.");
-            entity.Property(e => e.Permalink)
-                .IsRequired()
-                .HasMaxLength(200)
-                .IsUnicode(false)
-                .HasComment("The permament link for the presentation.");
             entity.Property(e => e.PresentationStatusId)
                 .HasDefaultValue(1)
                 .HasComment("Identifier of the status of the presentation is represented.");
@@ -374,7 +616,11 @@ public partial class HermesContext : DbContext
             entity.HasIndex(e => new { e.PresentationId, e.TagId }, "unqPresentationTag_PresentationId_TagId").IsUnique();
 
             entity.Property(e => e.PresentationTagId).HasComment("The identifier of the presentation/tag record.");
-            entity.Property(e => e.PresentationId).HasComment("Identifier of the associated presentation.");
+            entity.Property(e => e.PresentationId)
+                .IsRequired()
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("Identifier of the associated presentation.");
             entity.Property(e => e.TagId).HasComment("Identifier of the associated tag.");
 
             entity.HasOne(d => d.Presentation).WithMany(p => p.PresentationTags)
@@ -409,7 +655,11 @@ public partial class HermesContext : DbContext
                 .HasMaxLength(2)
                 .IsUnicode(false)
                 .IsFixedLength();
-            entity.Property(e => e.PresentationId).HasComment("The identifier of the associated presentation.");
+            entity.Property(e => e.PresentationId)
+                .IsRequired()
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The identifier of the associated presentation.");
             entity.Property(e => e.PresentationShortTitle)
                 .HasMaxLength(60)
                 .HasComment("The short title of the presentation.");
@@ -450,123 +700,6 @@ public partial class HermesContext : DbContext
             entity.Property(e => e.TypeDescription)
                 .HasMaxLength(500)
                 .HasComment("A description of the presentation type.");
-        });
-
-        modelBuilder.Entity<Submission>(entity =>
-        {
-            entity.HasKey(e => e.SubmissionId).HasName("pkcSubmission");
-
-            entity.ToTable("Submission", tb => tb.HasComment("Represents a session submission to a call for speakers."));
-
-            entity.Property(e => e.SubmissionId).HasComment("Identifier of the Submission record.");
-            entity.Property(e => e.AdditionalDetails)
-                .HasMaxLength(3000)
-                .HasComment("Any additional details about the session submission to the event organizers.");
-            entity.Property(e => e.CallForSpeakerId).HasComment("Identifier of the associated call for speakers.");
-            entity.Property(e => e.DecisionDate).HasComment("The date the event provided a decision about the submission.");
-            entity.Property(e => e.ElevatorPitch)
-                .HasMaxLength(300)
-                .HasComment("The elevator pitch for the session.");
-            entity.Property(e => e.PresentationId).HasComment("Identifier of the associated presentation.");
-            entity.Property(e => e.SessionDescription)
-                .IsRequired()
-                .HasMaxLength(3000)
-                .HasComment("The description of the submitted session.");
-            entity.Property(e => e.SessionLength).HasComment("The length of the submitted session (in minutes).");
-            entity.Property(e => e.SessionLevel)
-                .HasMaxLength(100)
-                .HasComment("The level of the submitted session.");
-            entity.Property(e => e.SessionTitle)
-                .IsRequired()
-                .HasMaxLength(300)
-                .HasComment("The title of the submitted session.");
-            entity.Property(e => e.SessionTrack)
-                .HasMaxLength(100)
-                .HasComment("The track the session was submitted under.");
-            entity.Property(e => e.SubmissionDate).HasComment("The date of the submission.");
-            entity.Property(e => e.SubmissionLanguageCode)
-                .IsRequired()
-                .HasMaxLength(2)
-                .IsUnicode(false)
-                .IsFixedLength();
-            entity.Property(e => e.SubmissionStatusId).HasComment("Identifier of the status for the submission.");
-
-            entity.HasOne(d => d.CallForSpeaker).WithMany(p => p.Submissions)
-                .HasForeignKey(d => d.CallForSpeakerId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fkSubmission_CallForSpeaker");
-
-            entity.HasOne(d => d.Presentation).WithMany(p => p.Submissions)
-                .HasForeignKey(d => d.PresentationId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fkSubmission_Presentation");
-
-            entity.HasOne(d => d.SubmissionStatus).WithMany(p => p.Submissions)
-                .HasForeignKey(d => d.SubmissionStatusId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fkSubmission_SubmissionStatus");
-        });
-
-        modelBuilder.Entity<SubmissionLearningObjective>(entity =>
-        {
-            entity.HasKey(e => e.SubmissionLearningObjectiveId).HasName("pkcSubmissionLearningObjective");
-
-            entity.ToTable("SubmissionLearningObjective", tb => tb.HasComment("Represents a learning objective that was a part of a submission to a call for speakers.."));
-
-            entity.Property(e => e.SubmissionLearningObjectiveId).HasComment("Identifier of the SubmissionLearningObjective record.");
-            entity.Property(e => e.LearningObjectiveText)
-                .IsRequired()
-                .HasMaxLength(1000)
-                .HasComment("The text of the submitted learning objective.");
-            entity.Property(e => e.SubmissionId).HasComment("Identifier of the associated submission record.");
-
-            entity.HasOne(d => d.Submission).WithMany(p => p.SubmissionLearningObjectives)
-                .HasForeignKey(d => d.SubmissionId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fkSubmissionLearningObjective_Submission");
-        });
-
-        modelBuilder.Entity<SubmissionStatus>(entity =>
-        {
-            entity.HasKey(e => e.SubmissionStatusId).HasName("pkcSubmissionStatus");
-
-            entity.ToTable("SubmissionStatus", tb => tb.HasComment("Represents a submission status."));
-
-            entity.Property(e => e.SubmissionStatusId)
-                .ValueGeneratedNever()
-                .HasComment("The identifier of the submnission status record.");
-            entity.Property(e => e.IndicatesAcceptance).HasComment("Flag indicating whether the submission status indicates acceptance.");
-            entity.Property(e => e.IsDefault).HasComment("Flag indicating whether the submission status is the default status.");
-            entity.Property(e => e.IsEnabled).HasComment("Flag indicating whether the submission status is enabled.");
-            entity.Property(e => e.SortOrder).HasComment("The sorting order of the submission status.");
-            entity.Property(e => e.StatusDescription)
-                .HasMaxLength(500)
-                .HasComment("A description of the submission status.");
-            entity.Property(e => e.SubmissionStatusName)
-                .IsRequired()
-                .HasMaxLength(100)
-                .HasComment("The name of the submission status.");
-        });
-
-        modelBuilder.Entity<SubmissionTag>(entity =>
-        {
-            entity.HasKey(e => e.SubmissionTagId).HasName("pkcSubmissionTag");
-
-            entity.ToTable("SubmissionTag", tb => tb.HasComment("Associated a tag with a call for speaker submission."));
-
-            entity.Property(e => e.SubmissionTagId).HasComment("Identifier of the SubmissionTag record.");
-            entity.Property(e => e.SubmissionId).HasComment("Identifier of the associated submission.");
-            entity.Property(e => e.TagId).HasComment("Identifier of the associated tag.");
-
-            entity.HasOne(d => d.Submission).WithMany(p => p.SubmissionTags)
-                .HasForeignKey(d => d.SubmissionId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fkSubmissionTag_Submission");
-
-            entity.HasOne(d => d.Tag).WithMany(p => p.SubmissionTags)
-                .HasForeignKey(d => d.TagId)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("fkSubmissionTag_Tag");
         });
 
         modelBuilder.Entity<Tag>(entity =>
