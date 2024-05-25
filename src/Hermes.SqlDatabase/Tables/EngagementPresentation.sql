@@ -2,7 +2,7 @@
 (
   EngagementPresentationId       INT            NOT NULL IDENTITY(1,1),
   EngagementId                   VARCHAR(200)   NOT NULL,
-  PresentationId                 INT            NOT NULL,
+  PresentationId                 VARCHAR(200)   NOT NULL,
   EngagementPresentationStatusId INT            NOT NULL CONSTRAINT dfEngagementPresentation_EngagementPresentationStatusId DEFAULT 1,
   StartDateTime                  DATETIME2          NULL,
   PresentationLength             INT            NOT NULL,
@@ -18,7 +18,7 @@
   IsEnabled                      BIT            NOT NULL CONSTRAINT dfEngagementPresentation_IsEnabled DEFAULT 1,
   CONSTRAINT pkcEngagementPresentation PRIMARY KEY CLUSTERED (EngagementPresentationId),
   CONSTRAINT fkEngagementPresentation_Engagement FOREIGN KEY (EngagementId) REFERENCES dbo.Engagement (Permalink),
-  CONSTRAINT fkEngagementPresentation_Presentation FOREIGN KEY (PresentationId) REFERENCES dbo.Presentation (PresentationId),
+  CONSTRAINT fkEngagementPresentation_Presentation FOREIGN KEY (PresentationId) REFERENCES dbo.Presentation (Permalink),
   CONSTRAINT fkEngagementPresentation_EngagementPresentationStatus FOREIGN KEY (EngagementPresentationStatusId) REFERENCES dbo.EngagementPresentationStatus (EngagementPresentationStatusId)
 )
 GO

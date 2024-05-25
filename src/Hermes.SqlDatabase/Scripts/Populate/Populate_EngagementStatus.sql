@@ -17,10 +17,19 @@ AS SOURCE (EngagementStatusId,
            EngagementStatusName,
            StatusDescription)
 ON TARGET.EngagementStatusId = SOURCE.EngagementStatusId
-WHEN MATCHED THEN UPDATE SET TARGET.EngagementStatusName = SOURCE.EngagementStatusName
+WHEN MATCHED THEN UPDATE SET TARGET.EngagementStatusName = SOURCE.EngagementStatusName,
+                             TARGET.SortOrder              = SOURCE.SortOrder,
+                             TARGET.IsEnabled              = SOURCE.IsEnabled,
+                             TARGET.StatusDescription      = SOURCE.StatusDescription
 WHEN NOT MATCHED THEN INSERT (EngagementStatusId,
-                              EngagementStatusName)
+                              EngagementStatusName,
+                              StatusDescription,
+                              SortOrder,
+                              IsEnabled)
                       VALUES (SOURCE.EngagementStatusId,
-                              SOURCE.EngagementStatusName)
+                              SOURCE.EngagementStatusName,
+                              SOURCE.StatusDescription,
+                              SOURCE.SortOrder,
+                              SOURCE.IsEnabled)
 WHEN NOT MATCHED BY SOURCE THEN DELETE;
 GO

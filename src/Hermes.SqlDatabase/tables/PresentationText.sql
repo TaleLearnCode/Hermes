@@ -1,7 +1,7 @@
 ﻿CREATE TABLE dbo.PresentationText
 (
   PresentationTextId     INT            NOT NULL IDENTITY(1,1),
-  PresentationId         INT            NOT NULL,
+  PresentationId         VARCHAR(200)   NOT NULL,
   LanguageCode           CHAR(2)        NOT NULL,
   PresentationTitle      NVARCHAR(300)  NOT NULL,
   PresentationShortTitle NVARCHAR(60)       NULL,
@@ -10,7 +10,7 @@
   ElevatorPitch          NVARCHAR(160)      NULL,
   AdditionalDetails      NVARCHAR(3000)     NULL,
   CONSTRAINT pkcPresentationText PRIMARY KEY CLUSTERED (PresentationTextId),
-  CONSTRAINT fkPresentationText_Presentation FOREIGN KEY (PresentationId) REFERENCES dbo.Presentation (PresentationId),
+  CONSTRAINT fkPresentationText_Presentation FOREIGN KEY (PresentationId) REFERENCES dbo.Presentation (Permalink),
   CONSTRAINT fkPresentationText_Language FOREIGN KEY (LanguageCode) REFERENCES dbo.Language (LanguageCode),
   CONSTRAINT unqPresentationText_PresentationId_LanguageCode UNIQUE (PresentationId, LanguageCode)
 )
