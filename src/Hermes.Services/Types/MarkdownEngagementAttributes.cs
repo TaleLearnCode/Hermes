@@ -16,6 +16,8 @@ internal static class MarkdownEngagementAttributes
 	internal const string EndDate = "End Date";
 	internal const string TimeZone = "Time Zone";
 	internal const string LanguageCode = "Language Code";
+	internal const string StartingCost = "Starting Cost";
+	internal const string EndingCost = "Ending Cost";
 	internal const string Url = "Url";
 	internal const string IncludeInPublicProfile = "Include In Public Profile";
 	internal const string IsVirtual = "Is Virtual";

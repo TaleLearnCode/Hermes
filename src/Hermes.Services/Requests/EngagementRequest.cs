@@ -18,13 +18,14 @@ public class EngagementRequest
 	public DateOnly? EndDate { get; set; }
 	public string TimeZone { get; set; }
 	public string LanguageCode { get; set; }
+	public string StartingCost { get; set; }
+	public string EndingCost { get; set; }
 	public string Description { get; set; }
 	public string Summary { get; set; }
 	public string Url { get; set; }
-	public bool IncludeInPublicProfile { get; set; }
-	public bool IsVirtual { get; set; }
-	public bool IsPublic { get; set; }
-	public bool IsEnabled { get; set; }
+	public bool IncludeInPublicProfile { get; set; } = true;
+	public bool IsVirtual { get; set; } = false;
+	public bool IsPublic { get; set; } = true;
 	public EngagementCallForSpeakerRequest? CallForSpeakerDetails { get; set; }
 	public List<EngagementPresentationRequest> Presentations { get; set; } = [];
 }

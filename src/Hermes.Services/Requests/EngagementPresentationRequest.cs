@@ -11,9 +11,9 @@ public class EngagementPresentationRequest
 	public string Room { get; set; }
 	public string EngagementPresentationUrl { get; set; }
 	public string LanguageCode { get; set; } = "en";
-	public string Title { get; set; } = "FROM MASTER";
+	public string Title { get; set; }
 	public string PresentationShortTitle { get; set; }
-	public string Abstract { get; set; } = "FROM MASTER";
+	public string Abstract { get; set; }
 	public string ShortAbstract { get; set; }
 	public string ElevatorPitch { get; set; }
 	public string AdditionalDetails { get; set; }

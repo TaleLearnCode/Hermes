@@ -2,7 +2,7 @@
   "profiles": {
     "Hermes": {
       "commandName": "Project",
-      "commandLineArgs": "presentations add -i \"C:\\Temp\\Hermes\\Presentations-Markdown\"",
+      "commandLineArgs": "engagements add -i \"C:\\Temp\\Hermes\\Engagements-Markdown\\serverless-architecture-conference-berlin-2024.md\"",
       "workingDirectory": "C:\\Repos\\Hermes\\src\\Hermes\\bin\\Debug\\net8.0"
     }
   }

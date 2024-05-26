@@ -3,7 +3,7 @@
 public class EngagementServices(string databaseConnectionString) : ServicesBase(databaseConnectionString)
 {
 
-	public async Task<string> AddEngagement(
+	public async Task<string> AddEngagementAsync(
 		EngagementRequest engagementRequest,
 		InputOutputFormat inputFormat,
 		string? outputPath,
@@ -14,6 +14,14 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 		await SaveOutputAsync(engagement, engagementRequest.Permalink, outputPath, inputFormat, outputFormat);
 		return $"The engagement with the permalink '{engagement.Permalink}' has been added.";
 	}
+
+	public async Task<string> AddEngagementAsync(
+		string inputFilePath,
+		InputOutputFormat inputFormat,
+		string? outputPath,
+		InputOutputFormat? outputFormat)
+		=> await AddEngagementAsync(
+			ParseFileToEngagementRequest(inputFilePath, inputFormat)!, inputFormat, outputPath, outputFormat);
 
 	private async Task<Engagement> GetEngagementAsync(string permalink)
 	{
@@ -76,13 +84,15 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			EndDate = engagementRequest.EndDate!.Value,
 			TimeZoneId = engagementRequest.TimeZone,
 			LanguageCode = engagementRequest.LanguageCode,
+			StartingCost = (!string.IsNullOrWhiteSpace(engagementRequest.StartingCost)) ? engagementRequest.StartingCost : null,
+			EndingCost = (!string.IsNullOrWhiteSpace(engagementRequest.EndingCost)) ? engagementRequest.EndingCost : null,
 			EngagementDescription = (!string.IsNullOrWhiteSpace(engagementRequest.Description)) ? engagementRequest.Description : null,
 			EngagementSummary = (!string.IsNullOrWhiteSpace(engagementRequest.Summary)) ? engagementRequest.Summary : null,
 			EngagementUrl = (!string.IsNullOrWhiteSpace(engagementRequest.Url)) ? engagementRequest.Url : null,
 			IncludeInPublicProfile = engagementRequest.IncludeInPublicProfile,
 			IsVirtual = engagementRequest.IsVirtual,
 			IsPublic = engagementRequest.IsPublic,
-			IsEnabled = engagementRequest.IsEnabled
+			IsEnabled = true
 		};
 
 		if (engagementRequest.CallForSpeakerDetails is not null)
@@ -113,14 +123,12 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 		foreach (EngagementPresentationRequest presentationRequest in engagementRequest.Presentations)
 		{
 
-			PresentationText presentationText = await GetFirstOrDefaultAsync<PresentationText>(x => x.PresentationId == presentationRequest.PresentationPermalink && x.LanguageCode == presentationRequest.LanguageCode)
-				?? throw new ArgumentException($"The presentation with the permalink '{presentationRequest.PresentationPermalink}' does not exist.");
-			string presentationTitle = (presentationRequest.Title.Equals("FROM MASTER", StringComparison.InvariantCultureIgnoreCase)) ? presentationText.PresentationTitle : presentationRequest.Title;
-			string? presentationShortTitle = (presentationRequest.PresentationShortTitle.Equals("FROM MASTER", StringComparison.InvariantCultureIgnoreCase)) ? presentationText.PresentationShortTitle : presentationRequest.PresentationShortTitle;
-			string? abstractDescription = (presentationRequest.Abstract.Equals("FROM MASTER", StringComparison.InvariantCultureIgnoreCase)) ? presentationText.Abstract : presentationRequest.Abstract;
-			string? shortAbstract = (presentationRequest.ShortAbstract.Equals("FROM MASTER", StringComparison.InvariantCultureIgnoreCase)) ? presentationText.ShortAbstract : presentationRequest.ShortAbstract;
-			string? elevatorPitch = (presentationRequest.ElevatorPitch.Equals("FROM MASTER", StringComparison.InvariantCultureIgnoreCase)) ? presentationText.ElevatorPitch : presentationRequest.ElevatorPitch;
-			string? additionalDetails = (presentationRequest.AdditionalDetails.Equals("FROM MASTER", StringComparison.InvariantCultureIgnoreCase)) ? presentationText.AdditionalDetails : presentationRequest.AdditionalDetails;
+			string presentationTitle = presentationRequest.Title;
+			string? presentationShortTitle = (!string.IsNullOrWhiteSpace(presentationRequest.PresentationShortTitle)) ? presentationRequest.PresentationShortTitle : null;
+			string? abstractDescription = presentationRequest.Abstract;
+			string? shortAbstract = (!string.IsNullOrWhiteSpace(presentationRequest.ShortAbstract)) ? presentationRequest.ShortAbstract : null;
+			string? elevatorPitch = (!string.IsNullOrWhiteSpace(presentationRequest.ElevatorPitch)) ? presentationRequest.ElevatorPitch : null;
+			string? additionalDetails = (!string.IsNullOrWhiteSpace(presentationRequest.AdditionalDetails)) ? presentationRequest.AdditionalDetails : null;
 
 			engagementConstruction.EngagementPresentations.Add(new()
 			{
@@ -137,7 +145,8 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 				Abstract = (!string.IsNullOrWhiteSpace(abstractDescription)) ? abstractDescription : null,
 				ShortAbstract = (!string.IsNullOrWhiteSpace(shortAbstract)) ? shortAbstract : null,
 				ElevatorPitch = (!string.IsNullOrWhiteSpace(elevatorPitch)) ? elevatorPitch : null,
-				AdditionalDetails = (!string.IsNullOrWhiteSpace(additionalDetails)) ? additionalDetails : null
+				AdditionalDetails = (!string.IsNullOrWhiteSpace(additionalDetails)) ? additionalDetails : null,
+				IsEnabled = true
 			});
 		}
 
@@ -170,18 +179,22 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			throw new ArgumentException("Permalink must be 200 characters or less.", "Engagement Permalink");
 		if (engagementRequest.City.Length > 100)
 			throw new ArgumentException("City must be 100 characters or less.", "City");
-		if (engagementRequest.Venue.Length > 200)
+		if (engagementRequest.Venue?.Length > 200)
 			throw new ArgumentException("Venue must be 200 characters or less.", "Venue");
-		if (engagementRequest.OverviewLocation.Length > 300)
+		if (engagementRequest.OverviewLocation?.Length > 300)
 			throw new ArgumentException("Overview location must be 300 characters or less.", "Overview Location");
-		if (engagementRequest.ListingLocation.Length > 100)
+		if (engagementRequest.ListingLocation?.Length > 100)
 			throw new ArgumentException("Listing location must be 100 characters or less.", "Listing Location");
-		if (engagementRequest.Description.Length > 2000)
+		if (engagementRequest.Description?.Length > 2000)
 			throw new ArgumentException("Description must be 2000 characters or less.", "Description");
-		if (engagementRequest.Summary.Length > 140)
+		if (engagementRequest.Summary?.Length > 140)
 			throw new ArgumentException("Summary must be 140 characters or less.", "Summary");
-		if (engagementRequest.Url.Length > 200)
+		if (engagementRequest.Url?.Length > 200)
 			throw new ArgumentException("URL must be 200 characters or less.", "URL");
+		if (engagementRequest.StartingCost?.Length > 20)
+			throw new ArgumentException("Starting cost must be 20 characters or less.", "Starting Cost");
+		if (engagementRequest.EndingCost?.Length > 20)
+			throw new ArgumentException("Ending cost must be 20 characters or less.", "Ending Cost");
 	}
 
 	private static void ValidateCallForSpeakersValues(EngagementRequest engagementRequest)
@@ -196,13 +209,13 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 				throw new ArgumentException("Call for speaker end date is required.", nameof(engagementRequest.CallForSpeakerDetails.EndDate));
 			if (engagementRequest.CallForSpeakerDetails.Url.Length > 200)
 				throw new ArgumentException("Call for speaker URL must be 200 characters or less.", "Call for speaker URL");
-			if (engagementRequest.CallForSpeakerDetails.SpeakerHonorariumNotes.Length > 200)
+			if (engagementRequest.CallForSpeakerDetails.SpeakerHonorariumNotes?.Length > 200)
 				throw new ArgumentException("Speaker honorarium notes must be 200 characters or less.", "Speaker honorarium notes");
-			if (engagementRequest.CallForSpeakerDetails.TravelExpensesNotes.Length > 200)
+			if (engagementRequest.CallForSpeakerDetails.TravelExpensesNotes?.Length > 200)
 				throw new ArgumentException("Travel expenses notes must be 200 characters or less.", "Travel expenses notes");
-			if (engagementRequest.CallForSpeakerDetails.AccommodationNotes.Length > 200)
+			if (engagementRequest.CallForSpeakerDetails.AccommodationNotes?.Length > 200)
 				throw new ArgumentException("Accommodation notes must be 200 characters or less.", "Accommodation notes");
-			if (engagementRequest.CallForSpeakerDetails.EventFeeNotes.Length > 200)
+			if (engagementRequest.CallForSpeakerDetails.EventFeeNotes?.Length > 200)
 				throw new ArgumentException("Event fee notes must be 200 characters or less.", "Event fee notes");
 			if (!Uri.TryCreate(engagementRequest.CallForSpeakerDetails.Url, UriKind.Absolute, out Uri? uri))
 				throw new ArgumentException("Call for speaker URL must be a valid URL.", "Call for speaker URL");
@@ -216,21 +229,21 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			ArgumentException.ThrowIfNullOrWhiteSpace(presentation.Status, nameof(presentation.Status));
 			if (presentation.PresentationLength <= 0)
 				throw new ArgumentException("Presentation length must be greater than zero.", nameof(presentation.PresentationLength));
-			if (presentation.Room.Length > 100)
+			if (presentation.Room?.Length > 100)
 				throw new ArgumentException("Room must be 100 characters or less.", "Presentation Room");
-			if (presentation.EngagementPresentationUrl.Length > 200)
+			if (presentation.EngagementPresentationUrl?.Length > 200)
 				throw new ArgumentException("Engagement presentation URL must be 200 characters or less.", "Engagement Presentation URL");
 			if (presentation.Title.Length > 300)
 				throw new ArgumentException("Title must be 300 characters or less.", "Presentation Title");
-			if (presentation.PresentationShortTitle.Length > 60)
+			if (presentation.PresentationShortTitle?.Length > 60)
 				throw new ArgumentException("Presentation short title must be 60 characters or less.", "Presentation Short Title");
-			if (presentation.Abstract.Length > 3000)
+			if (presentation.Abstract?.Length > 3000)
 				throw new ArgumentException("Abstract must be 3000 characters or less.", "Abstract");
-			if (presentation.ShortAbstract.Length > 2000)
+			if (presentation.ShortAbstract?.Length > 2000)
 				throw new ArgumentException("Short abstract must be 2000 characters or less.", "Short Abstract");
-			if (presentation.ElevatorPitch.Length > 300)
+			if (presentation.ElevatorPitch?.Length > 300)
 				throw new ArgumentException("Elevator pitch must be 300 characters or less.", "Elevator Pitch");
-			if (presentation.AdditionalDetails.Length > 3000)
+			if (presentation.AdditionalDetails?.Length > 3000)
 				throw new ArgumentException("Additional details must be 3000 characters or less.", "Additional Details");
 			foreach (LearningObjectiveRequest learningObjective in presentation.LearningObjectiveRequests)
 				if (learningObjective.Text.Length > 1000)
@@ -289,15 +302,13 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 		}
 	}
 
-	private EngagementRequest? ParseFileToEngagementRequest(string inputPath)
-	{
-		if (inputPath.EndsWith(".json"))
-			return ParseJsonToEngagementRequest(File.ReadAllText(inputPath));
-		else if (inputPath.EndsWith(".md"))
-			return ParseMarkdownFileToEngagementRequest(inputPath);
-		else
-			return null;
-	}
+	private EngagementRequest? ParseFileToEngagementRequest(string inputPath, InputOutputFormat inputFormat)
+		=> inputFormat switch
+		{
+			InputOutputFormat.Json => ParseJsonToEngagementRequest(File.ReadAllText(inputPath)),
+			InputOutputFormat.Markdown => ParseMarkdownFileToEngagementRequest(inputPath),
+			_ => null
+		};
 
 	private EngagementRequest? ParseJsonToEngagementRequest(string jsonContent)
 		=> JsonSerializer.Deserialize<EngagementRequest>(jsonContent, _jsonSerializerOptions);
@@ -318,6 +329,7 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 
 		EngagementPresentationRequest engagementPresentation = new();
 		bool buildingEngagementPresentationRequest = false;
+		bool firstPresentationFound = false;
 
 		string? currentH2 = null;
 		string? currentH3 = null;
@@ -338,8 +350,23 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 				currentH4 = null;
 				if (buildingEngagementPresentationRequest)
 				{
-					engagementRequest.Presentations.Add(engagementPresentation);
-					engagementPresentation = new();
+					if (firstPresentationFound == true)
+					{
+						engagementRequest.Presentations.Add(
+							FinalizePresentationParsing(
+								engagementPresentation,
+								abstractDescription,
+								shortAbstract,
+								elevatorPitch,
+								additionalDetails));
+						engagementPresentation = new();
+						abstractDescription = new();
+						shortAbstract = new();
+						elevatorPitch = new();
+						additionalDetails = new();
+					}
+					else
+						firstPresentationFound = true;
 				}
 			}
 			else if (currentMarkdownLine.StartsWith("#### "))
@@ -360,11 +387,25 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 						ParseCallForSpeakersAttribute(markdownLine, engagementRequest);
 						break;
 					case MarkdownEngagementHeadings.Presentations:
+						buildingEngagementPresentationRequest = true;
 						ParsePresentation(markdownLine, currentH4, engagementPresentation, abstractDescription, shortAbstract, elevatorPitch, additionalDetails);
 						break;
 				}
 			}
 		}
+
+		if (engagementDescription.ToString().Trim('\r', '\n').Length > 0)
+			engagementRequest.Description = engagementDescription.ToString().Trim('\r', '\n');
+		if (engagementSummary.ToString().Trim('\r', '\n').Length > 0)
+			engagementRequest.Summary = engagementSummary.ToString().Trim('\r', '\n');
+		if (buildingEngagementPresentationRequest && firstPresentationFound)
+			engagementRequest.Presentations.Add(
+				FinalizePresentationParsing(
+					engagementPresentation,
+					abstractDescription,
+					shortAbstract,
+					elevatorPitch,
+					additionalDetails));
 
 		return engagementRequest;
 
@@ -403,6 +444,10 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			engagementRequest.TimeZone = GetAttributeValue(tableRow);
 		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementAttributes.LanguageCode, StringComparison.InvariantCultureIgnoreCase))
 			engagementRequest.LanguageCode = GetAttributeValue(tableRow);
+		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementAttributes.StartingCost, StringComparison.InvariantCultureIgnoreCase))
+			engagementRequest.StartingCost = GetAttributeValue(tableRow);
+		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementAttributes.EndingCost, StringComparison.InvariantCultureIgnoreCase))
+			engagementRequest.EndingCost = GetAttributeValue(tableRow);
 		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementAttributes.Url, StringComparison.InvariantCultureIgnoreCase))
 			engagementRequest.Url = GetAttributeValue(tableRow);
 		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementAttributes.IncludeInPublicProfile, StringComparison.InvariantCultureIgnoreCase))
@@ -411,8 +456,6 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			engagementRequest.IsVirtual = bool.Parse(GetAttributeValue(tableRow));
 		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementAttributes.IsPublic, StringComparison.InvariantCultureIgnoreCase))
 			engagementRequest.IsPublic = bool.Parse(GetAttributeValue(tableRow));
-		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementAttributes.IsEnabled, StringComparison.InvariantCultureIgnoreCase))
-			engagementRequest.IsEnabled = bool.Parse(GetAttributeValue(tableRow));
 	}
 
 	private static void ParseEngagementDetails(string markdownLine, string? currentH3, StringBuilder engagementDescription, StringBuilder engagementSummary)
@@ -559,6 +602,24 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 					engagementPresentation.LearningObjectiveRequests.Add(new() { Text = ParseListItem(markdownLine), SortOrder = engagementPresentation.LearningObjectiveRequests.Count + 1 });
 				break;
 		}
+	}
+
+	private static EngagementPresentationRequest FinalizePresentationParsing(
+		EngagementPresentationRequest engagementPresentation,
+		StringBuilder abstractDescription,
+		StringBuilder shortAbstract,
+		StringBuilder elevatorPitch,
+		StringBuilder additionalDetails)
+	{
+		if (abstractDescription.ToString().Trim('\r', '\n').Length > 0)
+			engagementPresentation.Abstract = abstractDescription.ToString().Trim('\r', '\n');
+		if (shortAbstract.ToString().Trim('\r', '\n').Length > 0)
+			engagementPresentation.ShortAbstract = shortAbstract.ToString().Trim('\r', '\n');
+		if (elevatorPitch.ToString().Trim('\r', '\n').Length > 0)
+			engagementPresentation.ElevatorPitch = elevatorPitch.ToString().Trim('\r', '\n');
+		if (additionalDetails.ToString().Trim('\r', '\n').Length > 0)
+			engagementPresentation.AdditionalDetails = additionalDetails.ToString().Trim('\r', '\n');
+		return engagementPresentation;
 	}
 
 	private static void ParsePresentationAttribute(string markdownLine, EngagementPresentationRequest engagementPresentation)
