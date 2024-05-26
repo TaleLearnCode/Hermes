@@ -1,10 +1,10 @@
 ﻿CREATE TABLE dbo.PresentationTag
 (
-  PresentationTagId INT NOT NULL IDENTITY(1,1),
-  PresentationId    INT NOT NULL,
-  TagId             INT NOT NULL,
+  PresentationTagId INT          NOT NULL IDENTITY(1,1),
+  PresentationId    VARCHAR(200) NOT NULL,
+  TagId             INT          NOT NULL,
   CONSTRAINT pkcPresentationTag PRIMARY KEY CLUSTERED (PresentationTagId),
-  CONSTRAINT fkPresentationTag_Presentation FOREIGN KEY (PresentationId) REFERENCES dbo.Presentation (PresentationId),
+  CONSTRAINT fkPresentationTag_Presentation FOREIGN KEY (PresentationId) REFERENCES dbo.Presentation (Permalink),
   CONSTRAINT fkPresentationTag_Tag FOREIGN KEY (TagId) REFERENCES dbo.Tag (TagId),
   CONSTRAINT unqPresentationTag_PresentationId_TagId UNIQUE (PresentationId, TagId)
 )

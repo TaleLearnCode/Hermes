@@ -18,7 +18,7 @@ public partial class PresentationTag
     /// <summary>
     /// Identifier of the associated presentation.
     /// </summary>
-    public int PresentationId { get; set; }
+    public string PresentationId { get; set; }
 
     /// <summary>
     /// Identifier of the associated tag.

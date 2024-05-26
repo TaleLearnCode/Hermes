@@ -1,6 +1,7 @@
 ﻿global using Hermes.Extensions;
 global using Hermes.Models;
 global using Hermes.Requests;
+global using Hermes.Responses;
 global using Hermes.Types;
 global using Microsoft.EntityFrameworkCore;
 global using System.Linq.Expressions;

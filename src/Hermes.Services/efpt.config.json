@@ -16,19 +16,47 @@
    "T4TemplatePath": null,
    "Tables": [
       {
-         "Name": "[dbo].[CallForSpeaker]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[CallForSpeakerStatus]",
-         "ObjectType": 0
-      },
-      {
          "Name": "[dbo].[Country]",
          "ObjectType": 0
       },
       {
          "Name": "[dbo].[CountryDivision]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[Engagement]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EngagementCallForSpeaker]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EngagementCallForSpeakerStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EngagementPresentation]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EngagementPresentationLearningObjective]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EngagementPresentationStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EngagementPresentationTag]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EngagementStatus]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EngagementType]",
          "ObjectType": 0
       },
       {
@@ -57,22 +85,6 @@
       },
       {
          "Name": "[dbo].[PresentationType]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[Submission]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[SubmissionLearningObjective]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[SubmissionStatus]",
-         "ObjectType": 0
-      },
-      {
-         "Name": "[dbo].[SubmissionTag]",
          "ObjectType": 0
       },
       {

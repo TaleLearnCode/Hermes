@@ -25,6 +25,3 @@ WHEN NOT MATCHED THEN INSERT (PresentationStatusId,
                               SOURCE.IsEnabled)
 WHEN NOT MATCHED BY SOURCE THEN DELETE;
 GO
-
-SET IDENTITY_INSERT dbo.Presentation OFF
-GO

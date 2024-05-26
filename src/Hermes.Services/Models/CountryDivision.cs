@@ -32,7 +32,7 @@ public partial class CountryDivision
     /// </summary>
     public bool IsEnabled { get; set; }
 
-    public virtual ICollection<CallForSpeaker> CallForSpeakers { get; set; } = new List<CallForSpeaker>();
-
     public virtual Country CountryCodeNavigation { get; set; }
+
+    public virtual ICollection<Engagement> Engagements { get; set; } = new List<Engagement>();
 }

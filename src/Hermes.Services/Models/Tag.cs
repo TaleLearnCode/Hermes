@@ -25,7 +25,7 @@ public partial class Tag
     /// </summary>
     public bool IsEnabled { get; set; }
 
-    public virtual ICollection<PresentationTag> PresentationTags { get; set; } = new List<PresentationTag>();
+    public virtual ICollection<EngagementPresentationTag> EngagementPresentationTags { get; set; } = new List<EngagementPresentationTag>();
 
-    public virtual ICollection<SubmissionTag> SubmissionTags { get; set; } = new List<SubmissionTag>();
+    public virtual ICollection<PresentationTag> PresentationTags { get; set; } = new List<PresentationTag>();
 }

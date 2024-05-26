@@ -618,6 +618,3 @@ WHEN NOT MATCHED THEN INSERT (TimeZoneId,
                               SOURCE.DaylightOffset)
 WHEN NOT MATCHED BY SOURCE THEN DELETE;
 GO
-
-SET IDENTITY_INSERT dbo.Presentation OFF
-GO

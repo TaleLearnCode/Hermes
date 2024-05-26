@@ -30,6 +30,8 @@ public partial class Language
     /// </summary>
     public bool IsEnabled { get; set; }
 
+    public virtual ICollection<Engagement> Engagements { get; set; } = new List<Engagement>();
+
     public virtual ICollection<PresentationText> PresentationTexts { get; set; } = new List<PresentationText>();
 
     public virtual ICollection<Presentation> Presentations { get; set; } = new List<Presentation>();

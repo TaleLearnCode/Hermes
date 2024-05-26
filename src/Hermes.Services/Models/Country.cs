@@ -45,9 +45,9 @@ public partial class Country
     /// </summary>
     public bool IsEnabled { get; set; }
 
-    public virtual ICollection<CallForSpeaker> CallForSpeakers { get; set; } = new List<CallForSpeaker>();
-
     public virtual ICollection<CountryDivision> CountryDivisions { get; set; } = new List<CountryDivision>();
+
+    public virtual ICollection<Engagement> Engagements { get; set; } = new List<Engagement>();
 
     public virtual WorldRegion WorldRegionCodeNavigation { get; set; }
 }

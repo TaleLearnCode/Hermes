@@ -1,8 +1,4 @@
-﻿using Hermes.Responses;
-using Hermes.Types;
-using System.Text;
-
-namespace Hermes.Services;
+﻿namespace Hermes.Services;
 
 public class PresentationServices(string databaseConnectionString) : ServicesBase(databaseConnectionString)
 {
@@ -96,14 +92,14 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			}
 		}
 
-		if (elevatorPitch.ToString().TrimEnd('r', 'n').Length > 0)
-			presentationRequest.ElevatorPitch = elevatorPitch.ToString().TrimEnd('\r', '\n');
-		if (shortAbstract.ToString().TrimEnd('r', 'n').Length > 0)
-			presentationRequest.ShortAbstract = shortAbstract.ToString().TrimEnd('\r', '\n');
-		if (abstractText.ToString().TrimEnd('r', 'n').Length > 0)
-			presentationRequest.Abstract = abstractText.ToString().TrimEnd('\r', '\n');
-		if (resources.ToString().TrimEnd('r', 'n').Length > 0)
-			presentationRequest.Resources = resources.ToString().TrimEnd('\r', '\n');
+		if (elevatorPitch.ToString().Trim('r', 'n').Length > 0)
+			presentationRequest.ElevatorPitch = elevatorPitch.ToString().Trim('\r', '\n');
+		if (shortAbstract.ToString().Trim('r', 'n').Length > 0)
+			presentationRequest.ShortAbstract = shortAbstract.ToString().Trim('\r', '\n');
+		if (abstractText.ToString().Trim('r', 'n').Length > 0)
+			presentationRequest.Abstract = abstractText.ToString().Trim('\r', '\n');
+		if (resources.ToString().Trim('r', 'n').Length > 0)
+			presentationRequest.Resources = resources.ToString().Trim('\r', '\n');
 
 		return presentationRequest;
 	}
@@ -234,7 +230,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 	private static void UpdatePresentationText(PresentationRequest presentationRequest, Presentation presentation)
 	{
 		PresentationText presentationText = presentation.PresentationTexts
-			.FirstOrDefault(x => x.PresentationId == presentation.PresentationId)
+			.FirstOrDefault(x => x.PresentationId == presentation.Permalink)
 			?? GetNewPresentationText(presentationRequest);
 		presentationText.PresentationTitle = presentationRequest.Title;
 		presentationText.PresentationShortTitle = presentationRequest.ShortTitle;
@@ -371,7 +367,7 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			foreach (string tag in presentationRequest.Tags)
 			{
 				Tag? tagRecord = tags.FirstOrDefault(x => x.TagName == tag);
-				int tagId = tagRecord?.TagId ?? (await CreateAsync(new Tag { TagName = tag })).TagId;
+				int tagId = tagRecord?.TagId ?? (await CreateAsync(new Tag { TagName = tag, IsEnabled = true })).TagId;
 				presentationTags.Add(new() { TagId = tagId });
 			}
 		}
@@ -450,11 +446,11 @@ public class PresentationServices(string databaseConnectionString) : ServicesBas
 			if (tag.Length > 100)
 				throw new ArgumentException($"The tag '{tag}' exceeds the maximum length of 100 characters.");
 
-		if (!Uri.TryCreate(presentationRequest.PublicRepoLink, UriKind.Absolute, out Uri? publicRepoLinkUri))
+		if (!string.IsNullOrWhiteSpace(presentationRequest.PublicRepoLink) && !Uri.TryCreate(presentationRequest.PublicRepoLink, UriKind.Absolute, out Uri? publicRepoLinkUri))
 			throw new ArgumentException($"The public repository link '{presentationRequest.PublicRepoLink}' is not a valid URL.");
-		if (!Uri.TryCreate(presentationRequest.PrivateRepoLink, UriKind.Absolute, out Uri? privateRepoLinkUri))
+		if (!string.IsNullOrWhiteSpace(presentationRequest.PrivateRepoLink) && !Uri.TryCreate(presentationRequest.PrivateRepoLink, UriKind.Absolute, out Uri? privateRepoLinkUri))
 			throw new ArgumentException($"The private repository link '{presentationRequest.PrivateRepoLink}' is not a valid URL.");
-		if (!Uri.TryCreate(presentationRequest.Thumbnail, UriKind.Absolute, out Uri? thumbnailUri))
+		if (!string.IsNullOrWhiteSpace(presentationRequest.Thumbnail) && !Uri.TryCreate(presentationRequest.Thumbnail, UriKind.Absolute, out Uri? thumbnailUri))
 			throw new ArgumentException($"The thumbnail URL '{presentationRequest.Thumbnail}' is not a valid URL.");
 
 	}

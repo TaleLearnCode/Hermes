@@ -11,9 +11,9 @@ namespace Hermes.Models;
 public partial class Presentation
 {
     /// <summary>
-    /// The identifier of the presentation record.
+    /// The permament link for the presentation.
     /// </summary>
-    public int PresentationId { get; set; }
+    public string Permalink { get; set; }
 
     /// <summary>
     /// Identifier of the type of presentation is represented.
@@ -34,11 +34,6 @@ public partial class Presentation
     /// The link to the private repository for the presentation.
     /// </summary>
     public string PrivateRepoLink { get; set; }
-
-    /// <summary>
-    /// The permament link for the presentation.
-    /// </summary>
-    public string Permalink { get; set; }
 
     /// <summary>
     /// The original thumbnail image for the presentation.
@@ -67,6 +62,8 @@ public partial class Presentation
 
     public virtual Language DefaultLanguageCodeNavigation { get; set; }
 
+    public virtual ICollection<EngagementPresentation> EngagementPresentations { get; set; } = new List<EngagementPresentation>();
+
     public virtual PresentationStatus PresentationStatus { get; set; }
 
     public virtual ICollection<PresentationTag> PresentationTags { get; set; } = new List<PresentationTag>();
@@ -74,6 +71,4 @@ public partial class Presentation
     public virtual ICollection<PresentationText> PresentationTexts { get; set; } = new List<PresentationText>();
 
     public virtual PresentationType PresentationType { get; set; }
-
-    public virtual ICollection<Submission> Submissions { get; set; } = new List<Submission>();
 }
