@@ -75,6 +75,8 @@ public partial class Engagement
     /// </summary>
     public string TimeZoneId { get; set; }
 
+    public string LanguageCode { get; set; }
+
     /// <summary>
     /// The starting cost of the engagement.
     /// </summary>
@@ -124,13 +126,15 @@ public partial class Engagement
 
     public virtual CountryDivision CountryDivision { get; set; }
 
-    public virtual EngagementCallForSpeker EngagementCallForSpeker { get; set; }
+    public virtual EngagementCallForSpeaker EngagementCallForSpeaker { get; set; }
 
     public virtual ICollection<EngagementPresentation> EngagementPresentations { get; set; } = new List<EngagementPresentation>();
 
     public virtual EngagementStatus EngagementStatus { get; set; }
 
     public virtual EngagementType EngagementType { get; set; }
+
+    public virtual Language LanguageCodeNavigation { get; set; }
 
     public virtual TimeZone TimeZone { get; set; }
 }

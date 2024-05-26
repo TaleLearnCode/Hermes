@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Hermes.Models;
 
-public partial class EngagementCallForSpeker
+public partial class EngagementCallForSpeaker
 {
     /// <summary>
     /// The permalink of the engagement.
@@ -93,6 +93,8 @@ public partial class EngagementCallForSpeker
     /// The maximum number of submissions allowed per speaker.
     /// </summary>
     public int SubmissionLimit { get; set; }
+
+    public virtual EngagementCallForSpeakerStatus EngagementCallForSpeakerStatus { get; set; }
 
     public virtual Engagement EngagementPermalinkNavigation { get; set; }
 }

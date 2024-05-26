@@ -13,7 +13,7 @@
   PresentationShortTitle         NVARCHAR(60)       NULL,
   Abstract                       NVARCHAR(3000)     NULL,
   ShortAbstract                  NVARCHAR(2000)     NULL,
-  ElevatorPitch                  NVARCHAR(160)      NULL,
+  ElevatorPitch                  NVARCHAR(300)      NULL,
   AdditionalDetails              NVARCHAR(3000)     NULL,
   IsEnabled                      BIT            NOT NULL CONSTRAINT dfEngagementPresentation_IsEnabled DEFAULT 1,
   CONSTRAINT pkcEngagementPresentation PRIMARY KEY CLUSTERED (EngagementPresentationId),

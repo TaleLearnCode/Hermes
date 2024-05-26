@@ -9,3 +9,14 @@ _presentations.Initialize(rootCommand);
 
 
 return await rootCommand.InvokeAsync(args);
+
+
+
+
+
+//string markdownContent = System.IO.File.ReadAllText(@"C:\Repos\Hermes\src\Hermes\bin\Debug\net8.0\serverless-architecture-conference-berlin-2024.md");
+//EngagementRequest engagementRequest = EngagementServices.ParseMarkdownToEngagementRequest(markdownContent);
+//Console.WriteLine(engagementRequest.Name);
+
+//EngagementRequest engagementRequest = EngagementServices.ParseMarkdownFileToEngagementRequest(@"C:\Repos\Hermes\src\Hermes\bin\Debug\net8.0\serverless-architecture-conference-berlin-2024.md");
+//Console.WriteLine(engagementRequest.Name);

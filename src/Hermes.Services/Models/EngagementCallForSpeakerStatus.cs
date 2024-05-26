@@ -36,4 +36,6 @@ public partial class EngagementCallForSpeakerStatus
     /// Indicates whether the engagement call for speakers status is the default status.
     /// </summary>
     public bool IsDefault { get; set; }
+
+    public virtual ICollection<EngagementCallForSpeaker> EngagementCallForSpeakers { get; set; } = new List<EngagementCallForSpeaker>();
 }

@@ -28,11 +28,11 @@
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[EngagementCallForSpeakerStatus]",
+         "Name": "[dbo].[EngagementCallForSpeaker]",
          "ObjectType": 0
       },
       {
-         "Name": "[dbo].[EngagementCallForSpekers]",
+         "Name": "[dbo].[EngagementCallForSpeakerStatus]",
          "ObjectType": 0
       },
       {

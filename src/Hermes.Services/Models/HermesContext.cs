@@ -19,9 +19,9 @@ public partial class HermesContext : DbContext
 
     public virtual DbSet<Engagement> Engagements { get; set; }
 
-    public virtual DbSet<EngagementCallForSpeakerStatus> EngagementCallForSpeakerStatuses { get; set; }
+    public virtual DbSet<EngagementCallForSpeaker> EngagementCallForSpeakers { get; set; }
 
-    public virtual DbSet<EngagementCallForSpeker> EngagementCallForSpekers { get; set; }
+    public virtual DbSet<EngagementCallForSpeakerStatus> EngagementCallForSpeakerStatuses { get; set; }
 
     public virtual DbSet<EngagementPresentation> EngagementPresentations { get; set; }
 
@@ -193,6 +193,11 @@ public partial class HermesContext : DbContext
                 .HasDefaultValue(true)
                 .HasComment("Flag indicating whether the engagement is public.");
             entity.Property(e => e.IsVirtual).HasComment("Flag indicating whether the engagement is virtual.");
+            entity.Property(e => e.LanguageCode)
+                .IsRequired()
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .IsFixedLength();
             entity.Property(e => e.ListingLocation)
                 .HasMaxLength(100)
                 .HasComment("The location of the engagement as it should be listed.");
@@ -227,6 +232,11 @@ public partial class HermesContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fkEngagement_EngagementType");
 
+            entity.HasOne(d => d.LanguageCodeNavigation).WithMany(p => p.Engagements)
+                .HasForeignKey(d => d.LanguageCode)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagement_Language");
+
             entity.HasOne(d => d.TimeZone).WithMany(p => p.Engagements)
                 .HasForeignKey(d => d.TimeZoneId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -237,28 +247,11 @@ public partial class HermesContext : DbContext
                 .HasConstraintName("fkEngagement_CountryDivision");
         });
 
-        modelBuilder.Entity<EngagementCallForSpeakerStatus>(entity =>
-        {
-            entity.HasKey(e => e.EngagementCallForSpeakerStatusId).HasName("pkcEngagementCallForSpeakerStatus");
-
-            entity.ToTable("EngagementCallForSpeakerStatus", tb => tb.HasComment("Represents a status of an engagement call for speakers."));
-
-            entity.Property(e => e.EngagementCallForSpeakerStatusId)
-                .ValueGeneratedNever()
-                .HasComment("The identifier of the engagement call for speakers status record.");
-            entity.Property(e => e.EngagementCallForSpeakerStatusName)
-                .IsRequired()
-                .HasMaxLength(50)
-                .HasComment("The name of the engagement call for speakers status.");
-            entity.Property(e => e.IsDefault).HasComment("Indicates whether the engagement call for speakers status is the default status.");
-            entity.Property(e => e.IsEnabled).HasComment("Indicates whether the engagement call for speakers status is enabled.");
-            entity.Property(e => e.SortOrder).HasComment("The order in which the engagement call for speakers status should be displayed.");
-            entity.Property(e => e.StatusDescription).HasMaxLength(500);
-        });
-
-        modelBuilder.Entity<EngagementCallForSpeker>(entity =>
+        modelBuilder.Entity<EngagementCallForSpeaker>(entity =>
         {
             entity.HasKey(e => e.EngagementPermalink).HasName("pkcEngagementCallForSpekers");
+
+            entity.ToTable("EngagementCallForSpeaker");
 
             entity.Property(e => e.EngagementPermalink)
                 .HasMaxLength(200)
@@ -301,10 +294,34 @@ public partial class HermesContext : DbContext
                 .HasMaxLength(200)
                 .HasComment("Additional notes about travel expenses for speakers.");
 
-            entity.HasOne(d => d.EngagementPermalinkNavigation).WithOne(p => p.EngagementCallForSpeker)
-                .HasForeignKey<EngagementCallForSpeker>(d => d.EngagementPermalink)
+            entity.HasOne(d => d.EngagementCallForSpeakerStatus).WithMany(p => p.EngagementCallForSpeakers)
+                .HasForeignKey(d => d.EngagementCallForSpeakerStatusId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fkEngagementCallForSpekers_EngagementCallForSpeakerStatus");
+
+            entity.HasOne(d => d.EngagementPermalinkNavigation).WithOne(p => p.EngagementCallForSpeaker)
+                .HasForeignKey<EngagementCallForSpeaker>(d => d.EngagementPermalink)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fkEngagementCallForSpekers_Engagement");
+        });
+
+        modelBuilder.Entity<EngagementCallForSpeakerStatus>(entity =>
+        {
+            entity.HasKey(e => e.EngagementCallForSpeakerStatusId).HasName("pkcEngagementCallForSpeakerStatus");
+
+            entity.ToTable("EngagementCallForSpeakerStatus", tb => tb.HasComment("Represents a status of an engagement call for speakers."));
+
+            entity.Property(e => e.EngagementCallForSpeakerStatusId)
+                .ValueGeneratedNever()
+                .HasComment("The identifier of the engagement call for speakers status record.");
+            entity.Property(e => e.EngagementCallForSpeakerStatusName)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasComment("The name of the engagement call for speakers status.");
+            entity.Property(e => e.IsDefault).HasComment("Indicates whether the engagement call for speakers status is the default status.");
+            entity.Property(e => e.IsEnabled).HasComment("Indicates whether the engagement call for speakers status is enabled.");
+            entity.Property(e => e.SortOrder).HasComment("The order in which the engagement call for speakers status should be displayed.");
+            entity.Property(e => e.StatusDescription).HasMaxLength(500);
         });
 
         modelBuilder.Entity<EngagementPresentation>(entity =>
@@ -321,7 +338,7 @@ public partial class HermesContext : DbContext
                 .HasMaxLength(3000)
                 .HasComment("Additional details for the presentation.");
             entity.Property(e => e.ElevatorPitch)
-                .HasMaxLength(160)
+                .HasMaxLength(300)
                 .HasComment("The summary for the presentation.");
             entity.Property(e => e.EngagementId)
                 .IsRequired()

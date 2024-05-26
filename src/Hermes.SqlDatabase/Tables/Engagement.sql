@@ -13,6 +13,7 @@
   StartDate               DATE           NOT NULL,
   EndDate                 DATE           NOT NULL,
   TimeZoneId              VARCHAR(100)   NOT NULL,
+  LanguageCode            CHAR(2)        NOT NULL,
   StartingCost            NVARCHAR(20)       NULL,
   EndingCost              NVARCHAR(20)       NULL,
   EngagementDescription   NVARCHAR(2000)     NULL,
@@ -26,6 +27,7 @@
   CONSTRAINT fkEngagement_EngagementType FOREIGN KEY (EngagementTypeId) REFERENCES dbo.EngagementType (EngagementTypeId),
   CONSTRAINT fkEngagement_EngagementStatus FOREIGN KEY (EngagementStatusId) REFERENCES dbo.EngagementStatus (EngagementStatusId),
   CONSTRAINT fkEngagement_TimeZone FOREIGN KEY (TimeZoneId) REFERENCES dbo.TimeZone (TimeZoneId),
+  CONSTRAINT fkEngagement_Language FOREIGN KEY (LanguageCode) REFERENCES dbo.[Language] (LanguageCode),
   CONSTRAINT fkEngagement_Country FOREIGN KEY (CountryCode) REFERENCES dbo.Country (CountryCode),
   CONSTRAINT fkEngagement_CountryDivision FOREIGN KEY (CountryCode, CountryDivisionCode) REFERENCES dbo.CountryDivision (CountryCode, CountryDivisionCode),
 )

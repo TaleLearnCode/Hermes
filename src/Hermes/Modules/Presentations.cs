@@ -216,8 +216,10 @@ internal class Presentations(string databaseConnectionString)
 
 			if (!File.Exists(inputPath))
 			{
-				if (Directory.Exists(inputPath)) await AddPresentationsAsync(inputPath, inputFormatOption, outputPath, outputFormatOption);
-				AnsiConsole.MarkupLine($"[red]The specified input file [/][bold red]'{inputPath}'[/][red] does not exist.[/]");
+				if (Directory.Exists(inputPath))
+					await AddPresentationsAsync(inputPath, inputFormatOption, outputPath, outputFormatOption);
+				else
+					AnsiConsole.MarkupLine($"[red]The specified input file [/][bold red]'{inputPath}'[/][red] does not exist.[/]");
 				return;
 			}
 
@@ -360,15 +362,17 @@ internal class Presentations(string databaseConnectionString)
 
 			if (!IsInputPathValid(inputPath)) return;
 			if (!IsOutputPathValid(outputPath)) return;
-			InputOutputFormat inputFormat = GetInputFormat(inputPath, inputFormatOption);
+			//InputOutputFormat inputFormat = GetInputFormat(inputPath, inputFormatOption);
 			InputOutputFormat? outputFormat = GetOutputFormat(outputPath, outputFormatOption);
-			if (!TryGetInputFiles(inputPath, inputFormat, out string[] inputFilePaths)) return;
+			if (!TryGetInputFiles(inputPath, out string[] inputFilePaths)) return;
 
 			foreach (string inputFilePath in inputFilePaths)
 			{
 				AnsiConsole.MarkupLine($"[bold]Processing file:[/] {inputFilePath}");
 				try
 				{
+
+					InputOutputFormat inputFormat = GetInputFormat(inputFilePath, inputFormatOption);
 					PresentationRequest? presentationRequest = inputFormat switch
 					{
 						InputOutputFormat.Json => _presentationServices.BuildPresentationRequestFromJson(inputFilePath),
@@ -493,6 +497,24 @@ internal class Presentations(string databaseConnectionString)
 		return true;
 	}
 
+	private static bool TryGetInputFiles(string inputPath, out string[] inputFilePaths)
+	{
+		List<string> response = new();
+		string[] directoryFiles = Directory.GetFiles(inputPath, "*.*", SearchOption.TopDirectoryOnly);
+		if (directoryFiles.Length == 0)
+		{
+			inputFilePaths = [];
+		}
+		else
+		{
+			foreach (string file in directoryFiles)
+				if (file.EndsWith(".json") || file.EndsWith(".md"))
+					response.Add(file);
+			inputFilePaths = [.. response];
+		}
+		return inputFilePaths.Length > 0;
+	}
+
 	private static bool IsInputPathValid(string inputPath)
 	{
 		if (!Directory.Exists(inputPath))
@@ -511,6 +533,7 @@ internal class Presentations(string databaseConnectionString)
 			return false;
 		return true;
 	}
+
 	private async Task<string> AddPresentationFromRequestAsync(
 		PresentationRequest presentationRequest,
 		InputOutputFormat inputFormat,
