@@ -27,6 +27,7 @@ internal static class EngagementExtensions
 			Url = engagement.EngagementUrl,
 			IncludeInPublicProfile = engagement.IncludeInPublicProfile,
 			IsVirtual = engagement.IsVirtual,
+			IsHybrid = engagement.IsHybrid,
 			IsPublic = engagement.IsPublic,
 			IsEnabled = engagement.IsEnabled,
 			CallForSpeakerDetails = engagement.EngagementCallForSpeaker?.ToResponse(),
@@ -87,6 +88,7 @@ internal static class EngagementExtensions
 		response.AppendLine($"{MarkdownEngagementAttributes.Url} | {engagement.EngagementUrl} |");
 		response.AppendLine($"{MarkdownEngagementAttributes.IncludeInPublicProfile} | {engagement.IncludeInPublicProfile} |");
 		response.AppendLine($"{MarkdownEngagementAttributes.IsVirtual} | {engagement.IsVirtual} |");
+		response.AppendLine($"{MarkdownEngagementAttributes.IsHybrid} | {engagement.IsHybrid} |");
 		response.AppendLine($"{MarkdownEngagementAttributes.IsPublic} | {engagement.IsPublic} |");
 		response.AppendLine($"{MarkdownEngagementAttributes.IsEnabled} | {engagement.IsEnabled} |");
 		response.AppendLine();

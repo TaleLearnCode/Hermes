@@ -17,6 +17,7 @@ public class EngagementPresentationRequest
 	public string ShortAbstract { get; set; }
 	public string ElevatorPitch { get; set; }
 	public string AdditionalDetails { get; set; }
+	public bool IsVirtual { get; set; } = false;
 	public List<LearningObjectiveRequest> LearningObjectiveRequests { get; set; } = [];
 	public List<string> Tags { get; set; } = [];
 }

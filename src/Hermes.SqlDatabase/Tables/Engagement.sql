@@ -21,6 +21,7 @@
   EngagementUrl           VARCHAR(200)       NULL,
   IncludeInPublicProfile  BIT            NOT NULL CONSTRAINT dfEngagement_IncludeInPublicProfile DEFAULT 1,
   IsVirtual               BIT            NOT NULL CONSTRAINT dfEngagemnet_IsVirtual DEFAULT 0,
+  IsHybrid                BIT            NOT NULL CONSTRAINT dfEngagement_IsHybrid DEFAULT 0,
   IsPublic                BIT            NOT NULL CONSTRAINT dfEngagement_IsPublic DEFAULT 1,
   IsEnabled               BIT            NOT NULL CONSTRAINT dfEngagement_IsEnabled DEFAULT 1,
   CONSTRAINT pkcEngagement PRIMARY KEY CLUSTERED (Permalink),

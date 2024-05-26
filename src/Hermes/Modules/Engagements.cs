@@ -35,12 +35,29 @@ internal class Engagements(string databaseConnectionString) : ModuleBase
 
 	private async Task AddEngagementAsync(string inputPath, string? inputFormatOption, string? outputPath, string? outputFormatOption)
 	{
-		InputOutputFormat inputFormat = DetermineFileFormat(inputFormatOption, InputOutputFormat.Console, inputPath);
-		if (inputFormat == InputOutputFormat.Console)
-			throw new ArgumentException("The input file format is not supported. Please specify 'markdown' or 'json'.");
-		inputPath = DetermineFilePath(inputPath, inputFormat, "engagement");
-		InputOutputFormat outputFormat = DetermineFileFormat(outputFormatOption, inputFormat, outputPath, true);
-		AnsiConsole.WriteLine(await _engagementServices.AddEngagementAsync(inputPath, inputFormat, outputPath, outputFormat));
+		try
+		{
+			InputOutputFormat inputFormat = DetermineFileFormat(inputFormatOption, InputOutputFormat.Console, inputPath);
+			if (inputFormat == InputOutputFormat.Console)
+				throw new ArgumentException("The input file format is not supported. Please specify 'markdown' or 'json'.");
+			inputPath = DetermineFilePath(inputPath, inputFormat, "engagement");
+			InputOutputFormat outputFormat = DetermineFileFormat(outputFormatOption, inputFormat, outputPath, true);
+			AnsiConsole.WriteLine(await _engagementServices.AddEngagementAsync(inputPath, inputFormat, outputPath, outputFormat));
+
+		}
+		catch (ArgumentException ex)
+		{
+			AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
+		}
+		catch (Exception ex)
+		{
+			AnsiConsole.WriteException(ex,
+				ExceptionFormats.ShortenPaths
+				| ExceptionFormats.ShortenTypes
+				| ExceptionFormats.ShortenMethods
+				| ExceptionFormats.ShortenEverything
+				| ExceptionFormats.NoStackTrace);
+		}
 	}
 
 	#endregion

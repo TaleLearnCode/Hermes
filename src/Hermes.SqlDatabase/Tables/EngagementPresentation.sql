@@ -15,6 +15,7 @@
   ShortAbstract                  NVARCHAR(2000)     NULL,
   ElevatorPitch                  NVARCHAR(300)      NULL,
   AdditionalDetails              NVARCHAR(3000)     NULL,
+  IsVirtual                      BIT            NOT NULL CONSTRAINT dfEngagementPresentation_IsVirtual DEFAULT 0,
   IsEnabled                      BIT            NOT NULL CONSTRAINT dfEngagementPresentation_IsEnabled DEFAULT 1,
   CONSTRAINT pkcEngagementPresentation PRIMARY KEY CLUSTERED (EngagementPresentationId),
   CONSTRAINT fkEngagementPresentation_Engagement FOREIGN KEY (EngagementId) REFERENCES dbo.Engagement (Permalink),

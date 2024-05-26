@@ -112,6 +112,8 @@ public partial class Engagement
     /// </summary>
     public bool IsVirtual { get; set; }
 
+    public bool IsHybrid { get; set; }
+
     /// <summary>
     /// Flag indicating whether the engagement is public.
     /// </summary>

@@ -82,6 +82,8 @@ public partial class EngagementPresentation
     /// </summary>
     public string AdditionalDetails { get; set; }
 
+    public bool IsVirtual { get; set; }
+
     /// <summary>
     /// Flag indicating whether the engagement presentation is enabled.
     /// </summary>

@@ -25,6 +25,7 @@ public class EngagementRequest
 	public string Url { get; set; }
 	public bool IncludeInPublicProfile { get; set; } = true;
 	public bool IsVirtual { get; set; } = false;
+	public bool IsHybrid { get; set; } = false;
 	public bool IsPublic { get; set; } = true;
 	public EngagementCallForSpeakerRequest? CallForSpeakerDetails { get; set; }
 	public List<EngagementPresentationRequest> Presentations { get; set; } = [];

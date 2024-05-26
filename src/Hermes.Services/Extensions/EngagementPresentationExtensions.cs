@@ -20,6 +20,7 @@ internal static class EngagementPresentationExtensions
 		ShortAbstract = engagementPresentation.ShortAbstract,
 		ElevatorPitch = engagementPresentation.ElevatorPitch,
 		AdditionalDetails = engagementPresentation.AdditionalDetails,
+		IsHybrid = engagementPresentation.IsVirtual,
 		LearningObjectiveResponses = engagementPresentation.EngagementPresentationLearningObjectives.Select(lo => lo.ToResponse()).ToList(),
 		Tags = engagementPresentation.EngagementPresentationTags.Select(t => t.Tag.TagName).ToList()
 	};
@@ -53,6 +54,8 @@ internal static class EngagementPresentationExtensions
 		response.AppendLine($"| {MarkdownEngagementPresentationAttributes.Title} | {engagementPresentation.PresentationTitle} |");
 		if (engagementPresentation.PresentationShortTitle is not null)
 			response.AppendLine($"| {MarkdownEngagementPresentationAttributes.PresentationShortTitle} | {engagementPresentation.PresentationShortTitle} |");
+		if (engagementPresentation.IsVirtual)
+			response.AppendLine($"| {MarkdownEngagementPresentationAttributes.IsVirtual} | {engagementPresentation.IsVirtual} |");
 		response.AppendLine();
 		response.AppendLine($"#### {MarkdownEngagementPresentationHeadings.Abstract}");
 		response.AppendLine(engagementPresentation.Abstract);

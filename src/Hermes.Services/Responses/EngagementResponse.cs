@@ -23,6 +23,7 @@ public class EngagementResponse
 	public string? Url { get; set; }
 	public bool IncludeInPublicProfile { get; set; }
 	public bool IsVirtual { get; set; }
+	public bool IsHybrid { get; set; }
 	public bool IsPublic { get; set; }
 	public bool IsEnabled { get; set; }
 	public EngagementCallForSpeakerResponse? CallForSpeakerDetails { get; set; }

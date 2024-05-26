@@ -91,6 +91,7 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			EngagementUrl = (!string.IsNullOrWhiteSpace(engagementRequest.Url)) ? engagementRequest.Url : null,
 			IncludeInPublicProfile = engagementRequest.IncludeInPublicProfile,
 			IsVirtual = engagementRequest.IsVirtual,
+			IsHybrid = engagementRequest.IsHybrid,
 			IsPublic = engagementRequest.IsPublic,
 			IsEnabled = true
 		};
@@ -146,6 +147,7 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 				ShortAbstract = (!string.IsNullOrWhiteSpace(shortAbstract)) ? shortAbstract : null,
 				ElevatorPitch = (!string.IsNullOrWhiteSpace(elevatorPitch)) ? elevatorPitch : null,
 				AdditionalDetails = (!string.IsNullOrWhiteSpace(additionalDetails)) ? additionalDetails : null,
+				IsVirtual = presentationRequest.IsVirtual,
 				IsEnabled = true
 			});
 		}
@@ -454,6 +456,8 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			engagementRequest.IncludeInPublicProfile = bool.Parse(GetAttributeValue(tableRow));
 		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementAttributes.IsVirtual, StringComparison.InvariantCultureIgnoreCase))
 			engagementRequest.IsVirtual = bool.Parse(GetAttributeValue(tableRow));
+		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementAttributes.IsHybrid, StringComparison.InvariantCultureIgnoreCase))
+			engagementRequest.IsHybrid = bool.Parse(GetAttributeValue(tableRow));
 		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementAttributes.IsPublic, StringComparison.InvariantCultureIgnoreCase))
 			engagementRequest.IsPublic = bool.Parse(GetAttributeValue(tableRow));
 	}
@@ -643,6 +647,8 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			engagementPresentation.Title = GetAttributeValue(tableRow);
 		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementPresentationAttributes.PresentationShortTitle, StringComparison.InvariantCultureIgnoreCase))
 			engagementPresentation.PresentationShortTitle = GetAttributeValue(tableRow);
+		else if (string.Equals(GetAttributeType(tableRow), MarkdownEngagementPresentationAttributes.IsVirtual, StringComparison.InvariantCultureIgnoreCase) && bool.TryParse(GetAttributeValue(tableRow), out bool isVirtual))
+			engagementPresentation.IsVirtual = isVirtual;
 	}
 
 	private static string GetAttributeType(string[] tableRow) => tableRow.Length > 1 ? tableRow[1].Trim() : string.Empty;

@@ -21,6 +21,7 @@ internal static class MarkdownEngagementAttributes
 	internal const string Url = "Url";
 	internal const string IncludeInPublicProfile = "Include In Public Profile";
 	internal const string IsVirtual = "Is Virtual";
+	internal const string IsHybrid = "Is Hybrid";
 	internal const string IsPublic = "Is Public";
 	internal const string IsEnabled = "Is Enabled";
 }

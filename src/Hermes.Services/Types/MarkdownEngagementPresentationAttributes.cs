@@ -11,4 +11,5 @@ internal static class MarkdownEngagementPresentationAttributes
 	internal const string LanguageCode = "Language Code";
 	internal const string Title = "Title";
 	internal const string PresentationShortTitle = "Presentation Short Title";
+	internal const string IsVirtual = "Is Virtual";
 }
