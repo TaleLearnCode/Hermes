@@ -37,6 +37,15 @@ internal class Engagements(string databaseConnectionString) : ModuleBase
 	{
 		try
 		{
+			if (!File.Exists(inputPath))
+			{
+				if (Directory.Exists(inputPath))
+					await AddEngagementsAsync(inputPath, inputFormatOption, outputPath, outputFormatOption);
+				else
+					AnsiConsole.MarkupLine($"[red]The specified input file or directory does not exist.[/]");
+				return;
+			}
+
 			InputOutputFormat inputFormat = DetermineFileFormat(inputFormatOption, InputOutputFormat.Console, inputPath);
 			if (inputFormat == InputOutputFormat.Console)
 				throw new ArgumentException("The input file format is not supported. Please specify 'markdown' or 'json'.");
@@ -44,6 +53,52 @@ internal class Engagements(string databaseConnectionString) : ModuleBase
 			InputOutputFormat outputFormat = DetermineFileFormat(outputFormatOption, inputFormat, outputPath, true);
 			AnsiConsole.WriteLine(await _engagementServices.AddEngagementAsync(inputPath, inputFormat, outputPath, outputFormat));
 
+		}
+		catch (ArgumentException ex)
+		{
+			AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
+		}
+		catch (Exception ex)
+		{
+			AnsiConsole.WriteException(ex,
+				ExceptionFormats.ShortenPaths
+				| ExceptionFormats.ShortenTypes
+				| ExceptionFormats.ShortenMethods
+				| ExceptionFormats.ShortenEverything
+				| ExceptionFormats.NoStackTrace);
+		}
+	}
+
+	private async Task AddEngagementsAsync(string inputPath, string? inputFormatOption, string outputPath, string? outputFormatOption)
+	{
+		try
+		{
+			if (!IsInputPathValid(inputPath)) return;
+			if (!IsOutputPathValid(outputPath)) return;
+			InputOutputFormat? outputFormat = GetOutputFormat(outputPath, outputFormatOption);
+			if (!TryGetInputFiles(inputPath, out string[] inputFilePaths)) return;
+			foreach (string inputFilePath in inputFilePaths)
+			{
+				AnsiConsole.MarkupLine($"[bold]Processing file:[/] {inputFilePath}");
+				try
+				{
+					InputOutputFormat inputFormat = GetInputFormat(inputFilePath, inputFormatOption);
+					AnsiConsole.WriteLine(await _engagementServices.AddEngagementAsync(inputFilePath, inputFormat, outputPath, outputFormat));
+				}
+				catch (ArgumentException ex)
+				{
+					AnsiConsole.MarkupLine($"[red]{ex.Message}[/]");
+				}
+				catch (Exception ex)
+				{
+					AnsiConsole.WriteException(ex,
+						ExceptionFormats.ShortenPaths
+						| ExceptionFormats.ShortenTypes
+						| ExceptionFormats.ShortenMethods
+						| ExceptionFormats.ShortenEverything
+						| ExceptionFormats.NoStackTrace);
+				}
+			}
 		}
 		catch (ArgumentException ex)
 		{

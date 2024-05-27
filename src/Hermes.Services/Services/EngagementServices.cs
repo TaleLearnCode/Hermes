@@ -189,8 +189,8 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			throw new ArgumentException("Listing location must be 100 characters or less.", "Listing Location");
 		if (engagementRequest.Description?.Length > 2000)
 			throw new ArgumentException("Description must be 2000 characters or less.", "Description");
-		if (engagementRequest.Summary?.Length > 140)
-			throw new ArgumentException("Summary must be 140 characters or less.", "Summary");
+		if (engagementRequest.Summary?.Length > 160)
+			throw new ArgumentException("Summary must be 160 characters or less.", "Summary");
 		if (engagementRequest.Url?.Length > 200)
 			throw new ArgumentException("URL must be 200 characters or less.", "URL");
 		if (engagementRequest.StartingCost?.Length > 20)
