@@ -23,6 +23,57 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 		=> await AddEngagementAsync(
 			ParseFileToEngagementRequest(inputFilePath, inputFormat)!, inputFormat, outputPath, outputFormat);
 
+	public async Task<string> AddEngagementPresentationDownloadAsync(
+		string engagementPermalink,
+		string presentationPermalink,
+		string downloadType,
+		string downloadName,
+		string? downloadPath)
+	{
+		Engagement engagement = await GetEngagementAsync(engagementPermalink);
+		EngagementPresentation engagementPresentation = engagement.EngagementPresentations.FirstOrDefault(p => p.PresentationId == presentationPermalink)
+			?? throw new ArgumentException($"The presentation with the permalink '{presentationPermalink}' does not exist.");
+		DownloadType downloadTypeObject = await GetFirstOrDefaultAsync<DownloadType>(dt => dt.DownloadTypeName == downloadType)
+			?? throw new ArgumentException($"The download type '{downloadType}' does not exist.");
+		engagementPresentation.EngagementPresentationDownloads.Add(new()
+		{
+			DownloadTypeId = downloadTypeObject.DownloadTypeId,
+			DownloadName = downloadName,
+			DownloadPath = (!string.IsNullOrWhiteSpace(downloadPath)) ? downloadPath : null
+		});
+		await UpdateAsync(engagement);
+		return $"The download '{downloadName}' has been added to the presentation with the permalink '{presentationPermalink}' for the engagement with the permalink '{engagementPermalink}'.";
+	}
+
+	public async Task<List<DownloadType>> GetDownloadTypesAsync() => await GetAllAsync<DownloadType>();
+
+	public async Task<Dictionary<string, string>> GetEngagementsForYearAsync(int year)
+	{
+		using HermesContext context = new(_databaseConnectionString);
+		return await context.Engagements
+			.Where(e => e.StartDate.Year == year)
+			.OrderBy(e => e.EngagementName)
+			.ToDictionaryAsync(e => e.Permalink, e => e.EngagementName);
+	}
+
+	public async Task<List<int>> GetEngagementYearsAsync()
+	{
+		using HermesContext context = new(_databaseConnectionString);
+		return await context.Engagements
+			.Select(e => e.StartDate.Year)
+			.Distinct()
+			.OrderBy(y => y)
+			.ToListAsync();
+	}
+
+	public async Task<Dictionary<string, string>> GetEngagementPresentationsAsync(string engagementPermalink)
+	{
+		using HermesContext context = new(_databaseConnectionString);
+		return await context.EngagementPresentations
+			.Where(x => x.EngagementId == engagementPermalink)
+			.ToDictionaryAsync(x => x.PresentationId, x => x.PresentationTitle);
+	}
+
 	private async Task<Engagement> GetEngagementAsync(string permalink)
 	{
 		using HermesContext context = new(_databaseConnectionString);
