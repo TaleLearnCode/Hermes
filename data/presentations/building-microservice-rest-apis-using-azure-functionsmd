@@ -1,0 +1,44 @@
+## Presentation Attributes
+| Attribute | Value |
+|---|---|
+| Permalink | building-microservice-rest-apis-using-azure-functions |
+| Title | Building Microservice REST APIs Using Azure Functions |
+| Short Title | Building Microservice REST APIs Using Azure Functions |
+| Presentation Type | Session |
+| Presentation Status | Active |
+| Public Repo Link | https://github.com/TaleLearnCode/BuildingMicroserviceRESTAPIsUsingAzureFunctions |
+| Private Repo Link |  |
+| Thumbnail | https://github.com/TaleLearnCode/BuildingMicroserviceRESTAPIsUsingAzureFunctions/blob/main/Thumbnail.jpg |
+| Include In Public Profile | true |
+| Default Language Code | en |
+| Is Archived | false |
+
+## Elevator Pitch
+In this session, we’ll explore Azure Functions and see how they can be used to build out a microservice-based solution.
+
+## Short Abstract
+The microservice pattern serves as excellent practice in building modern applications to be more resilient and reduce dependencies across multiple parts of a product. But generally, these involve complex web frameworks and containerization to get those benefits. But by using Azure Functions, we can develop more concise services even quicker and get many of the benefits of serverless technology without lots of operational management. In this session, we’ll explore Azure Functions and see how they can be used to build out a microservice-based solution.
+
+## Abstract
+The microservice pattern serves as excellent practice in building modern applications to be more resilient and reduce dependencies across multiple parts of a product. But generally, these involve complex web frameworks and containerization to get those benefits. But by using Azure Functions, we can develop more concise services even quicker and get many of the benefits of serverless technology without lots of operational management. In this session, we’ll explore Azure Functions and see how they can be used to build out a microservice-based solution.
+
+## Tags
+- .NET
+- APIs
+- Architecture
+- Azure
+- C#
+- Cloud
+- Cloud-Native
+- Cloud-Native Architectures
+- Cloud-Native Microservices
+- Microservices
+- REST APIs
+- RESTful APIs
+- Serverless
+- Software Design
+
+## Learning Objectives
+- Understand the concepts and benefits of microservice architectures
+- Understand the benefits of using serverless technologies for high-performance REST APIs
+- See firsthand how to use serverless technologies to implement a microservice architecture

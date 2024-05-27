@@ -17,7 +17,7 @@
   StartingCost            NVARCHAR(20)       NULL,
   EndingCost              NVARCHAR(20)       NULL,
   EngagementDescription   NVARCHAR(2000)     NULL,
-  EngagementSummary       NVARCHAR(140)      NULL,
+  EngagementSummary       NVARCHAR(160)      NULL,
   EngagementUrl           VARCHAR(200)       NULL,
   IncludeInPublicProfile  BIT            NOT NULL CONSTRAINT dfEngagement_IncludeInPublicProfile DEFAULT 1,
   IsVirtual               BIT            NOT NULL CONSTRAINT dfEngagemnet_IsVirtual DEFAULT 0,

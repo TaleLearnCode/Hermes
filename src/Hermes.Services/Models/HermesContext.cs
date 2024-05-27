@@ -174,7 +174,7 @@ public partial class HermesContext : DbContext
                 .HasDefaultValue(1)
                 .HasComment("The identifier of the engagement status.");
             entity.Property(e => e.EngagementSummary)
-                .HasMaxLength(140)
+                .HasMaxLength(160)
                 .HasComment("The summary of the engagement.");
             entity.Property(e => e.EngagementTypeId)
                 .HasDefaultValue(1)
