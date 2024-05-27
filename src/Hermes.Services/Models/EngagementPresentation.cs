@@ -91,6 +91,8 @@ public partial class EngagementPresentation
 
     public virtual Engagement Engagement { get; set; }
 
+    public virtual ICollection<EngagementPresentationDownload> EngagementPresentationDownloads { get; set; } = new List<EngagementPresentationDownload>();
+
     public virtual ICollection<EngagementPresentationLearningObjective> EngagementPresentationLearningObjectives { get; set; } = new List<EngagementPresentationLearningObjective>();
 
     public virtual EngagementPresentationStatus EngagementPresentationStatus { get; set; }

@@ -63,3 +63,11 @@ The Louisville .NET Meetup group is dedicated to helping developers become bette
 #### Abstract
 
 Explore the pivotal role of effective design patterns in achieving maintainable, scalable, and robust systems within the dynamic landscape of software development. The presentation begins with an overview of design patterns, emphasizing their significance in modern software engineering. It then delves into a carefully selected set of essential design patterns, providing real-world examples and use cases to illustrate their practical applications. The session highlights each pattern's benefits and potential drawbacks, addressing concerns related to code maintainability, extensibility, and collaboration within development teams. We give special attention to pattern selection criteria, empowering participants to make informed decisions about applying specific patterns. By the session's end, attendees will possess a solid foundation in crucial software design patterns, enabling them to make informed design choices, write cleaner and more modular code, and confidently tackle complex software engineering challenges, benefiting both novice and experienced professionals in enhancing their development practices and elevating the quality of their software projects.
+
+#### Downloads
+
+| Name   | Type       | Path                                                         |
+| ------ | ---------- | ------------------------------------------------------------ |
+| Slides | Slides     | https://github.com/TaleLearnCode/EssentialSoftwareDesignPatterns/blob/main/EventMaterials/EssentialSoftwareDesignPatterns-LouDotNet.pdf |
+| Code   | Code Demos | https://github.com/TaleLearnCode/EssentialSoftwareDesignPatterns/blob/main/Demos |
+

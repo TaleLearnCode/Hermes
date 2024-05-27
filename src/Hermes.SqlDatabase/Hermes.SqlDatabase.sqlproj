@@ -83,6 +83,8 @@
     <Build Include="Tables\EngagementPresentationLearningObjective.sql" />
     <Build Include="Tables\EngagementCallForSpekers.sql" />
     <Build Include="Tables\EngagementCallForSpeakerStatus.sql" />
+    <Build Include="Tables\EngagementPresentationDownload.sql" />
+    <Build Include="Tables\DownloadType.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Scripts\Populate\Populate_Language.sql" />
@@ -97,6 +99,7 @@
     <None Include="Scripts\Populate\Populate_EngagementStatus.sql" />
     <None Include="Scripts\Populate\Populate_EngagementPresentationStatus.sql" />
     <None Include="Scripts\Populate\Populate_EngagementCallForSpeakerStatus.sql" />
+    <None Include="Scripts\Populate\Populate_DownloadType.sql" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\Script.PostDeployment.sql" />

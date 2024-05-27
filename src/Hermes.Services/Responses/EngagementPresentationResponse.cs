@@ -19,4 +19,5 @@ public class EngagementPresentationResponse
 	public bool IsHybrid { get; set; }
 	public List<LearningObjectiveResponse>? LearningObjectiveResponses { get; set; }
 	public List<string>? Tags { get; set; }
+	public List<EngagementPresentationDownloadResponse>? Downloads { get; set; }
 }
