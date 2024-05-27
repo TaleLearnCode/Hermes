@@ -4,26 +4,27 @@ internal static class EngagementPresentationExtensions
 {
 
 	internal static EngagementPresentationResponse ToResponse(this EngagementPresentation engagementPresentation)
-	=> new()
-	{
-		PresentationPermalink = engagementPresentation.PresentationId,
-		Status = engagementPresentation.EngagementPresentationStatus.EngagementPresentationStatusName,
-		StatusDescription = engagementPresentation.EngagementPresentationStatus.StatusDescription,
-		StartDateTime = engagementPresentation.StartDateTime,
-		PresentationLength = engagementPresentation.PresentationLength,
-		Room = engagementPresentation.Room,
-		EngagementPresentationUrl = engagementPresentation.EngagementPresentationUrl,
-		LanguageCode = engagementPresentation.LangaugeCode,
-		Title = engagementPresentation.PresentationTitle,
-		PresentationShortTitle = engagementPresentation.PresentationShortTitle,
-		Abstract = engagementPresentation.Abstract,
-		ShortAbstract = engagementPresentation.ShortAbstract,
-		ElevatorPitch = engagementPresentation.ElevatorPitch,
-		AdditionalDetails = engagementPresentation.AdditionalDetails,
-		IsHybrid = engagementPresentation.IsVirtual,
-		LearningObjectiveResponses = engagementPresentation.EngagementPresentationLearningObjectives.Select(lo => lo.ToResponse()).ToList(),
-		Tags = engagementPresentation.EngagementPresentationTags.Select(t => t.Tag.TagName).ToList()
-	};
+		=> new()
+		{
+			PresentationPermalink = engagementPresentation.PresentationId,
+			Status = engagementPresentation.EngagementPresentationStatus.EngagementPresentationStatusName,
+			StatusDescription = engagementPresentation.EngagementPresentationStatus.StatusDescription,
+			StartDateTime = engagementPresentation.StartDateTime,
+			PresentationLength = engagementPresentation.PresentationLength,
+			Room = engagementPresentation.Room,
+			EngagementPresentationUrl = engagementPresentation.EngagementPresentationUrl,
+			LanguageCode = engagementPresentation.LangaugeCode,
+			Title = engagementPresentation.PresentationTitle,
+			PresentationShortTitle = engagementPresentation.PresentationShortTitle,
+			Abstract = engagementPresentation.Abstract,
+			ShortAbstract = engagementPresentation.ShortAbstract,
+			ElevatorPitch = engagementPresentation.ElevatorPitch,
+			AdditionalDetails = engagementPresentation.AdditionalDetails,
+			IsHybrid = engagementPresentation.IsVirtual,
+			LearningObjectiveResponses = engagementPresentation.EngagementPresentationLearningObjectives.Select(lo => lo.ToResponse()).ToList(),
+			Tags = engagementPresentation.EngagementPresentationTags.Select(t => t.Tag.TagName).ToList(),
+			Downloads = engagementPresentation.EngagementPresentationDownloads.Select(d => d.ToResponse()).ToList()
+		};
 
 	internal static List<EngagementPresentationResponse>? ToResponse(this IEnumerable<EngagementPresentation> engagementPresentations)
 	{
@@ -90,6 +91,11 @@ internal static class EngagementPresentationExtensions
 			response.AppendLine($"#### {MarkdownEngagementPresentationHeadings.Tags}");
 			foreach (EngagementPresentationTag? tag in engagementPresentation.EngagementPresentationTags)
 				response.AppendLine($"- {tag.Tag.TagName}");
+		}
+		if (engagementPresentation.EngagementPresentationDownloads.Count > 0)
+		{
+			response.AppendLine();
+			response.AppendLine(engagementPresentation.EngagementPresentationDownloads.ToMarkdown());
 		}
 		return response.ToString();
 	}

@@ -9,3 +9,4 @@
 :r .\Populate\Populate_EngagementStatus.sql
 :r .\Populate\Populate_EngagementPresentationStatus.sql
 :r .\Populate\Populate_EngagementCallForSpeakerStatus.sql
+:r .\Populate\Populate_DownloadType.sql

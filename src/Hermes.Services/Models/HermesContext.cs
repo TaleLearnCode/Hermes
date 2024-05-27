@@ -17,6 +17,8 @@ public partial class HermesContext : DbContext
 
     public virtual DbSet<CountryDivision> CountryDivisions { get; set; }
 
+    public virtual DbSet<DownloadType> DownloadTypes { get; set; }
+
     public virtual DbSet<Engagement> Engagements { get; set; }
 
     public virtual DbSet<EngagementCallForSpeaker> EngagementCallForSpeakers { get; set; }
@@ -24,6 +26,8 @@ public partial class HermesContext : DbContext
     public virtual DbSet<EngagementCallForSpeakerStatus> EngagementCallForSpeakerStatuses { get; set; }
 
     public virtual DbSet<EngagementPresentation> EngagementPresentations { get; set; }
+
+    public virtual DbSet<EngagementPresentationDownload> EngagementPresentationDownloads { get; set; }
 
     public virtual DbSet<EngagementPresentationLearningObjective> EngagementPresentationLearningObjectives { get; set; }
 
@@ -132,6 +136,26 @@ public partial class HermesContext : DbContext
                 .HasForeignKey(d => d.CountryCode)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fkCountryDivision_Country");
+        });
+
+        modelBuilder.Entity<DownloadType>(entity =>
+        {
+            entity.HasKey(e => e.DownloadTypeId).HasName("pkcDownloadType");
+
+            entity.ToTable("DownloadType");
+
+            entity.Property(e => e.DownloadTypeId)
+                .ValueGeneratedNever()
+                .HasComment("The identifier of the download type record.");
+            entity.Property(e => e.DownloadTypeName)
+                .IsRequired()
+                .HasMaxLength(100)
+                .HasComment("The name of the download type.");
+            entity.Property(e => e.IsEnabled).HasComment("Flag indicating whether the download type is enabled.");
+            entity.Property(e => e.SortOrder).HasComment("The sorting order of the download type.");
+            entity.Property(e => e.TypeDescription)
+                .HasMaxLength(500)
+                .HasComment("A description of the download type.");
         });
 
         modelBuilder.Entity<Engagement>(entity =>
@@ -397,6 +421,38 @@ public partial class HermesContext : DbContext
                 .HasForeignKey(d => d.PresentationId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fkEngagementPresentation_Presentation");
+        });
+
+        modelBuilder.Entity<EngagementPresentationDownload>(entity =>
+        {
+            entity.HasKey(e => e.EngagementPresentationDownloadId).HasName("pkcEngagementPresentationDownload");
+
+            entity.ToTable("EngagementPresentationDownload");
+
+            entity.Property(e => e.EngagementPresentationDownloadId).HasComment("The identifier of the engagement presentation download record.");
+            entity.Property(e => e.DownloadName)
+                .IsRequired()
+                .HasMaxLength(50)
+                .HasComment("The name of the download.");
+            entity.Property(e => e.DownloadPath)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("The path to the download.");
+            entity.Property(e => e.DownloadTypeId).HasComment("The identifier of the download type.");
+            entity.Property(e => e.EngagementPresentationId).HasComment("The identifier of the engagement presentation record.");
+            entity.Property(e => e.IsEnabled)
+                .HasDefaultValue(true)
+                .HasComment("Flag indicating whether the download is enabled.");
+
+            entity.HasOne(d => d.DownloadType).WithMany(p => p.EngagementPresentationDownloads)
+                .HasForeignKey(d => d.DownloadTypeId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_DownloadTypeId");
+
+            entity.HasOne(d => d.EngagementPresentation).WithMany(p => p.EngagementPresentationDownloads)
+                .HasForeignKey(d => d.EngagementPresentationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_EngagementPresentationId");
         });
 
         modelBuilder.Entity<EngagementPresentationLearningObjective>(entity =>

@@ -38,6 +38,9 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			.Include(e => e.EngagementPresentations)
 				.ThenInclude(p => p.EngagementPresentationTags)
 					.ThenInclude(t => t.Tag)
+			.Include(e => e.EngagementPresentations)
+				.ThenInclude(p => p.EngagementPresentationDownloads)
+					.ThenInclude(d => d.DownloadType)
 			.Include(e => e.CountryCodeNavigation)
 			.Include(e => e.CountryDivision)
 			.Include(e => e.TimeZone)
@@ -131,7 +134,7 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			string? elevatorPitch = (!string.IsNullOrWhiteSpace(presentationRequest.ElevatorPitch)) ? presentationRequest.ElevatorPitch : null;
 			string? additionalDetails = (!string.IsNullOrWhiteSpace(presentationRequest.AdditionalDetails)) ? presentationRequest.AdditionalDetails : null;
 
-			engagementConstruction.EngagementPresentations.Add(new()
+			EngagementPresentation engagementPresentation = new()
 			{
 				EngagementId = engagementConstruction.Permalink,
 				PresentationId = presentationRequest.PresentationPermalink,
@@ -149,7 +152,23 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 				AdditionalDetails = (!string.IsNullOrWhiteSpace(additionalDetails)) ? additionalDetails : null,
 				IsVirtual = presentationRequest.IsVirtual,
 				IsEnabled = true
-			});
+			};
+
+			if (presentationRequest.Downloads.Count > 0)
+			{
+				foreach (EngagementPresentationDownloadRequest download in presentationRequest.Downloads)
+				{
+					engagementPresentation.EngagementPresentationDownloads.Add(new()
+					{
+						DownloadTypeId = (await GetFirstOrDefaultAsync<DownloadType>(x => x.DownloadTypeName == download.Type))!.DownloadTypeId,
+						DownloadName = download.Name,
+						DownloadPath = download.Path
+					});
+				}
+			}
+
+			engagementConstruction.EngagementPresentations.Add(engagementPresentation);
+
 		}
 
 		return engagementConstruction;
@@ -255,6 +274,13 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 					throw new ArgumentException("Tag must be 100 characters or less.", "Tag");
 			if (!string.IsNullOrWhiteSpace(presentation.EngagementPresentationUrl) && !Uri.TryCreate(presentation.EngagementPresentationUrl, UriKind.Absolute, out Uri? uri))
 				throw new ArgumentException("Engagement presentation URL must be a valid URL.", "Engagement Presentation URL");
+			foreach (EngagementPresentationDownloadRequest download in presentation.Downloads)
+			{
+				if (download.Name.Length > 50)
+					throw new ArgumentException("Download name must be 50 characters or less.", "Download Name");
+				if (download.Path.Length > 200)
+					throw new ArgumentException("Download Path must be 200 characters or less.", "Download URL");
+			}
 		}
 	}
 
@@ -300,6 +326,13 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			if (!string.IsNullOrWhiteSpace(presentationRequest.LanguageCode))
 			{
 				Language? language = await GetFirstOrDefaultAsync<Language>(l => l.LanguageCode == presentationRequest.LanguageCode) ?? throw new ArgumentException($"The language code '{presentationRequest.LanguageCode}' does not exist.");
+			}
+			if (presentationRequest.Downloads.Count > 0)
+			{
+				IEnumerable<string> downloadTypes = (await GetAllAsync<DownloadType>()).Select(x => x.DownloadTypeName);
+				foreach (EngagementPresentationDownloadRequest download in presentationRequest.Downloads)
+					if (!downloadTypes.Contains(download.Type))
+						throw new ArgumentException($"The download type '{download.Type}' does not exist.");
 			}
 		}
 	}
@@ -604,6 +637,21 @@ public class EngagementServices(string databaseConnectionString) : ServicesBase(
 			case MarkdownEngagementPresentationHeadings.LearningObjectives:
 				if (markdownLine.StartsWith("- "))
 					engagementPresentation.LearningObjectiveRequests.Add(new() { Text = ParseListItem(markdownLine), SortOrder = engagementPresentation.LearningObjectiveRequests.Count + 1 });
+				break;
+			case MarkdownEngagementPresentationHeadings.Downloads:
+				if (markdownLine.Trim().StartsWith('|')
+					&& !markdownLine.Trim().StartsWith("| Name")
+					&& !markdownLine.Trim().StartsWith("| -")
+					&& !markdownLine.Trim().StartsWith("|-"))
+				{
+					string[] tableRow = markdownLine.Split('|');
+					engagementPresentation.Downloads.Add(new()
+					{
+						Name = tableRow[1].Trim(),
+						Type = tableRow[2].Trim(),
+						Path = tableRow[3].Trim()
+					});
+				}
 				break;
 		}
 	}

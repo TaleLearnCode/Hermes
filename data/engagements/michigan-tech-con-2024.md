@@ -88,6 +88,14 @@ Design patterns are potent tools in software development that solve recurring pr
 
  Join us as we explore design patterns that have earned their place in software engineering history but may only sometimes live up to their reputation. We'll discuss real-world scenarios where these patterns can lead to unintended consequences, including convoluted code, performance bottlenecks, and intricate debugging sessions.
 
+#### Downloads
+
+| Name   | Type   | Path                                                         |
+| ------ | ------ | ------------------------------------------------------------ |
+| Slides | Slides | https://github.com/TaleLearnCode/ReevaluatingSoftwareDesignPatterns/blob/main/EventMaterials/ReevaluatingSoftwareDesignPatterns_MITechCon.pdf |
+
+
+
 ### Technical Debt Is Not Free
 
 #### Presentation Attributes
@@ -106,6 +114,14 @@ Design patterns are potent tools in software development that solve recurring pr
 
 So many software development teams rack up technical debt and do not even realize it. But even if you are a more mature team and recognize and maybe even document technical debt, what good is it if you do not take action. Just like in other parts of our life, just because we can accumulate bunches of debt, if we do not take steps to handle it, we will be destined for bad times when that comes due. In this session, we’ll explore technical debt, how to properly document and track it, and – more importantly – how to address it so that it does not cause significant issues down the road.
 
+#### Downloads
+
+| Name   | Type   | Path                                                         |
+| ------ | ------ | ------------------------------------------------------------ |
+| Slides | Slides | https://github.com/TaleLearnCode/TechnicalDebtIsNotFree/blob/main/EventMaterials/TechnicalDebitIsNotFree-MITechCon.pdf |
+
+
+
 ### File New: Build a Fully-Managed and Documented API
 
 #### Presentation Attributes
@@ -122,6 +138,14 @@ So many software development teams rack up technical debt and do not even realiz
 #### Abstract
 
 Azure API Management is a way to create consistent modern API gateways for existing backend services. It provides an interface for your backend services and APIs while ensuring they are secured, monitored, maintained, well-documented, and published to the cloud. In this session, we will focus on the how by creating a new Azure API Management instance, configuring API endpoints to be served by the API Management instance, setting up rate-limiting, transforming data coming in and out of the endpoints, providing a portal for developers to intact with the API, and add security and performance. You will see firsthand how to get the most out of Azure API Management to make your APIs accessible to your internal and external customers.
+
+#### Downloads
+
+| Name   | Type   | Path                                                         |
+| ------ | ------ | ------------------------------------------------------------ |
+| Slides | Slides | https://github.com/TaleLearnCode/FileNew-APIManagement/blob/main/EventMaterials/FileNew-APIManagement-MITechCon.pdf |
+
+
 
 ### Essential Software Design Patterns for Optimal Development
 

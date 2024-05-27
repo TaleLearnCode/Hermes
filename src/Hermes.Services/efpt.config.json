@@ -24,6 +24,10 @@
          "ObjectType": 0
       },
       {
+         "Name": "[dbo].[DownloadType]",
+         "ObjectType": 0
+      },
+      {
          "Name": "[dbo].[Engagement]",
          "ObjectType": 0
       },
@@ -37,6 +41,10 @@
       },
       {
          "Name": "[dbo].[EngagementPresentation]",
+         "ObjectType": 0
+      },
+      {
+         "Name": "[dbo].[EngagementPresentationDownload]",
          "ObjectType": 0
       },
       {

@@ -20,4 +20,5 @@ public class EngagementPresentationRequest
 	public bool IsVirtual { get; set; } = false;
 	public List<LearningObjectiveRequest> LearningObjectiveRequests { get; set; } = [];
 	public List<string> Tags { get; set; } = [];
+	public List<EngagementPresentationDownloadRequest> Downloads { get; set; } = [];
 }
