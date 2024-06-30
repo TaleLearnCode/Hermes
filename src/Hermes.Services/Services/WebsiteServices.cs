@@ -8,6 +8,8 @@ public class WebsiteServices(string databaseConnectionString) : ServicesBase(dat
 	public async Task<string> GetEngagementsAsync(string outputPath)
 	{
 
+		// TODO: Update presentation texts to come from EngagementPresentation
+
 		using HermesContext context = new(_databaseConnectionString);
 		List<Models.Engagement> engagements = await context.Engagements
 			.Include(e => e.EngagementPresentations)
@@ -78,6 +80,79 @@ public class WebsiteServices(string databaseConnectionString) : ServicesBase(dat
 
 	}
 
+	public async Task<string> GetPresentationsAsync(string outputPath)
+	{
 
+		using HermesContext context = new(_databaseConnectionString);
+		List<Models.Presentation> presentations = await context.Presentations
+			.Include(p => p.PresentationTexts.Where(x => x.LanguageCode == "en"))
+				.ThenInclude(o => o.LearningObjectives)
+			.Include(p => p.EngagementPresentations)
+				.ThenInclude(x => x.Engagement)
+					.ThenInclude(x => x.CountryCodeNavigation)
+			.Include(p => p.EngagementPresentations)
+				.ThenInclude(x => x.EngagementPresentationStatus)
+			.Include(t => t.PresentationTags)
+				.ThenInclude(x => x.Tag)
+			.Where(p => p.IncludeInPublicProfile)
+			.ToListAsync();
+
+		List<WebsiteData.Presentation> websitePresentations = [];
+		foreach (Models.Presentation presentation in presentations)
+		{
+			WebsiteData.Presentation websitePresentation = new()
+			{
+				Title = presentation.PresentationTexts.First().PresentationTitle,
+				// TODO: Add subtitle to Presentation
+				//Subtitle = presentation.PresentationTexts.First().Subtitle,
+				Description = presentation.PresentationTexts.First().ShortAbstract,
+				Abstract = presentation.PresentationTexts.First().Abstract,
+				LearningObjectives = presentation.PresentationTexts.First().LearningObjectives.Select(x => x.LearningObjectiveText).ToList(),
+				Slug = presentation.Permalink,
+				// TODO: Add image to Presentation
+				Image = string.IsNullOrEmpty(presentation.OriginalThumbnailUrl) ? null : new Uri(presentation.OriginalThumbnailUrl),
+				// TODO: Determine what should be used as AltText for the image
+				ImageAltText = presentation.PresentationTexts.First().PresentationTitle,
+				Tags = presentation.PresentationTags.Select(x => x.Tag.TagName).ToList(),
+				// TODO: Add duration to Presentation
+				Duration = "45 - 60 minutes",
+				RepoUrl = string.IsNullOrEmpty(presentation.PublicRepoLink) ? null : new Uri(presentation.PublicRepoLink)
+				// TODO: Add resources to Presentation
+			};
+			// TODO: Add related presentations to Presentation
+
+			List<Models.EngagementPresentation> something = presentation.EngagementPresentations
+				.Where(x => x.EngagementPresentationStatus.IncludeOnWebsite)
+				//.OrderByDescending(x => x.StartDateTime)
+				.OrderByDescending(x => x.Engagement.StartDate)
+				.ToList();
+
+
+
+			foreach (Models.EngagementPresentation engagementPresentation in presentation.EngagementPresentations.Where(x => x.EngagementPresentationStatus.IncludeOnWebsite).OrderByDescending(x => x.Engagement.StartDate).ToList())
+			{
+				websitePresentation.Engagements.Add(new()
+				{
+					Title = engagementPresentation.Engagement.EngagementName,
+					Date = engagementPresentation.Engagement.WebsiteDataDate(),
+					Location = engagementPresentation.Engagement.WebsiteDataLocation(),
+					Venue = engagementPresentation.Engagement.Venue,
+					// TODO: Add image to Engagement
+					Image = new Uri("https://via.placeholder.com/150"),
+					// TODO: Determine proper alt text for image (engagement name; something more descriptive)
+					ImageAltText = engagementPresentation.Engagement.EngagementName,
+					Description = engagementPresentation.Engagement.EngagementDescription,
+					WebsiteUrl = string.IsNullOrWhiteSpace(engagementPresentation.Engagement.EngagementUrl) ? null : new Uri(engagementPresentation.Engagement.EngagementUrl),
+					// TODO: Add registration URL to Engagement
+					//RegistrationUrl = string.IsNullOrWhiteSpace(engagementPresentation.Engagement.RegistrationUrl) ? null : new Uri(engagementPresentation.Engagement.RegistrationUrl),
+					Slug = engagementPresentation.Engagement.Permalink
+				});
+			}
+			websitePresentations.Add(websitePresentation);
+		}
+
+		return SaveFile<List<WebsiteData.Presentation>>(outputPath, JsonSerializer.Serialize(websitePresentations, _jsonSerializerOptions));
+
+	}
 
 }
