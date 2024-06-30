@@ -3,6 +3,7 @@
   EngagementStatusId   INT           NOT NULL,
   EngagementStatusName NVARCHAR(100) NOT NULL,
   StatusDescription    NVARCHAR(500)     NULL,
+  DisplayOnWebsite     BIT           NOT NULL,
   SortOrder            INT           NOT NULL,
   IsEnabled            BIT           NOT NULL
   CONSTRAINT pkcEngagementStatus PRIMARY KEY CLUSTERED (EngagementStatusId),
@@ -18,6 +19,8 @@ GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'EngagementStatus', @level2name=N'SortOrder',            @value=N'The sorting order of the engagement status.',                                                 @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'EngagementStatus', @level2name=N'StatusDescription',    @value=N'A description of the engagement status.',                                                     @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
+GO
+EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'EngagementStatus', @level2name=N'DisplayOnWebsite',     @value=N'Flag indicating whether the engagement status should be displayed on the website.',           @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO
 EXEC sp_addextendedproperty @level0name=N'dbo', @level1name=N'EngagementStatus', @level2name=N'IsEnabled',            @value=N'Flag indicating whether the engagement status is enabled.',                                   @name=N'MS_Description', @level0type=N'SCHEMA', @level1type=N'TABLE', @level2type=N'COLUMN';
 GO

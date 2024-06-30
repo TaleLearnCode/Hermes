@@ -34,6 +34,8 @@ internal static class EngagementExtensions
 			Presentations = engagement.EngagementPresentations.ToResponse() ?? null
 		};
 
+	#region ToMarkdown
+
 	internal static string ToMarkdown(this Engagement engagement)
 	{
 		StringBuilder response = new();
@@ -136,6 +138,26 @@ internal static class EngagementExtensions
 				response.AppendLine(presentation.ToMarkdown());
 			}
 		}
+	}
+
+	#endregion
+
+	internal static string WebsiteDataDate(this Engagement engagement)
+	{
+		if (engagement.StartDate == engagement.EndDate)
+			return engagement.StartDate.ToString("MMMM dd, yyyy");
+		else if (engagement.StartDate.Month == engagement.EndDate.Month)
+			return $"{engagement.StartDate.ToString("MMMM dd")} - {engagement.EndDate.ToString("dd, yyyy")}";
+		else
+			return $"{engagement.StartDate.ToString("MMMM dd")} - {engagement.EndDate.ToString("MMMM dd, yyyy")}";
+	}
+
+	internal static string WebsiteDataLocation(this Engagement engagement)
+	{
+		if (engagement.CountryCode == "US" || engagement.CountryCode == "CA")
+			return $"{engagement.City}, {engagement.CountryDivisionCode}";
+		else
+			return $"{engagement.City}, {engagement.CountryCodeNavigation.CountryName}";
 	}
 
 }

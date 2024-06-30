@@ -26,6 +26,11 @@ public partial class EngagementStatus
     public string StatusDescription { get; set; }
 
     /// <summary>
+    /// Flag indicating whether the engagement status should be displayed on the website.
+    /// </summary>
+    public bool DisplayOnWebsite { get; set; }
+
+    /// <summary>
     /// The sorting order of the engagement status.
     /// </summary>
     public int SortOrder { get; set; }

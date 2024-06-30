@@ -434,6 +434,7 @@ public partial class HermesContext : DbContext
                 .IsRequired()
                 .HasMaxLength(100)
                 .HasComment("The name of the engagement presentation status.");
+            entity.Property(e => e.IncludeOnWebsite).HasComment("Flag indicating whether the engagement presentation status should be included on the website.");
             entity.Property(e => e.IsEnabled).HasComment("Flag indicating whether the engagement presentation status is enabled.");
             entity.Property(e => e.SortOrder).HasComment("The sorting order of the engagement presentation status.");
             entity.Property(e => e.StatusDescription)
@@ -471,6 +472,7 @@ public partial class HermesContext : DbContext
             entity.Property(e => e.EngagementStatusId)
                 .ValueGeneratedNever()
                 .HasComment("The identifier of the engagement status record.");
+            entity.Property(e => e.DisplayOnWebsite).HasComment("Flag indicating whether the engagement status should be displayed on the website.");
             entity.Property(e => e.EngagementStatusName)
                 .IsRequired()
                 .HasMaxLength(100)

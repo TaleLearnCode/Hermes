@@ -3,11 +3,13 @@
 Presentations _presentations = new(databaseConnectionString);
 //CallForSpeakers _callForSpeakers = new(databaseConnectionString);
 Engagements _engagements = new(databaseConnectionString);
+Website _website = new(databaseConnectionString);
 
 RootCommand rootCommand = new("Hermes: Speaking Engagement Management and Analytics Platform");
 _presentations.Initialize(rootCommand);
 //_callForSpeakers.Initialize(rootCommand);
 _engagements.Initialize(rootCommand);
+_website.Initialize(rootCommand);
 
 return await rootCommand.InvokeAsync(args);
 

@@ -2,7 +2,7 @@
   "profiles": {
     "Hermes": {
       "commandName": "Project",
-      "commandLineArgs": "engagements add -i \"C:\\Temp\\Hermes\\Engagements-Markdown\"",
+      "commandLineArgs": "website engagements",
       "workingDirectory": "C:\\Repos\\Hermes\\src\\Hermes\\bin\\Debug\\net8.0"
     }
   }
